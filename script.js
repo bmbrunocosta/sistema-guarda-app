@@ -57,6 +57,10 @@ function montarDadosChamadaApi(nome, argumentos) {
       return { sessaoToken: sessaoComandanteToken };
     case 'getPainelComandante':
       return { sessaoToken: sessaoComandanteToken };
+    case 'getPessoasDentroGuarda':
+      return { sessaoToken: sessaoToken };
+    case 'registrarSaidaRapidaPessoa':
+      return { idMovimentacaoEntrada: argumentos[0], sessaoToken: sessaoToken };
     case 'getDadosSOS':
       return { sessaoToken: sessaoToken };
     case 'registrarMovimentacaoSOS':
@@ -162,6 +166,8 @@ function criarExecutorAppsScript() {
     'getGuardaAtivo',
     'getComandanteAtivo',
     'getPainelComandante',
+    'getPessoasDentroGuarda',
+    'registrarSaidaRapidaPessoa',
     'getDadosSOS',
     'registrarMovimentacaoSOS',
     'buscarPessoasPorRgCpf',
@@ -212,6 +218,7 @@ Object.defineProperty(window.google.script, 'run', {
   let comandanteAtual = null;
   let emailEncerramentoComandante = null;
   let painelComandanteCarregado = false;
+  let pessoasDentroGuardaCarregadas = false;
 
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -225,6 +232,10 @@ Object.defineProperty(window.google.script, 'run', {
     aplicarCodigoDoLink();
 
     setInterval(() => {
+      if (aparelhoAssumiuGuardaAtual()) {
+        carregarPessoasDentroGuarda(true);
+      }
+
       if (aparelhoAssumiuComandanteAtual()) {
         carregarPainelComandante(true);
       }
@@ -544,6 +555,7 @@ Object.defineProperty(window.google.script, 'run', {
         selecoesViaturasSOS = {};
         document.getElementById('observacoesSOS').value = '';
         renderizarSelecaoViaturasSOS();
+        carregarPessoasDentroGuarda(true);
         carregarPainelComandante(true);
         botao.disabled = false;
       })
@@ -974,6 +986,7 @@ Object.defineProperty(window.google.script, 'run', {
       .withSuccessHandler((resposta) => {
         mostrarMensagem(resposta.mensagem || 'Movimentação registrada com sucesso.', 'sucesso');
         limparFormulario();
+        carregarPessoasDentroGuarda(true);
 
         if (aparelhoAssumiuComandanteAtual()) {
           carregarPainelComandante(true);
@@ -1637,6 +1650,143 @@ function criarEstadoVazioPainel(texto) {
   return vazio;
 }
 
+function carregarPessoasDentroGuarda(silencioso = false) {
+  if (!aparelhoAssumiuGuardaAtual()) {
+    atualizarVisibilidadePessoasDentroGuarda();
+    return;
+  }
+
+  const botao = document.getElementById('btnAtualizarPessoasDentroGuarda');
+
+  if (botao) {
+    botao.disabled = true;
+    botao.textContent = 'Atualizando...';
+  }
+
+  google.script.run
+    .withSuccessHandler((resposta) => {
+      renderizarPessoasDentroGuarda(resposta && resposta.pessoas ? resposta.pessoas : []);
+      pessoasDentroGuardaCarregadas = true;
+
+      const atualizadoEm = document.getElementById('atualizadoEmPessoasDentroGuarda');
+      if (atualizadoEm) {
+        atualizadoEm.textContent = resposta && resposta.atualizadoEm
+          ? 'Atualizado em ' + resposta.atualizadoEm
+          : '';
+      }
+
+      if (botao) {
+        botao.disabled = false;
+        botao.textContent = 'Atualizar';
+      }
+    })
+    .withFailureHandler((erro) => {
+      if (!silencioso) {
+        mostrarMensagem('Erro ao carregar pessoas dentro: ' + erro.message, 'erro');
+      }
+
+      if (botao) {
+        botao.disabled = false;
+        botao.textContent = 'Atualizar';
+      }
+    })
+    .getPessoasDentroGuarda();
+}
+
+function renderizarPessoasDentroGuarda(pessoas) {
+  const lista = document.getElementById('listaPessoasDentroGuarda');
+
+  if (!lista) return;
+
+  lista.innerHTML = '';
+
+  if (!pessoas.length) {
+    lista.appendChild(criarEstadoVazioPainel('Nenhuma pessoa consta como dentro do quartel.'));
+    return;
+  }
+
+  pessoas.forEach(pessoa => {
+    const item = document.createElement('div');
+    item.className = 'item-painel item-dentro item-pessoa-dentro-guarda';
+
+    const informacoes = document.createElement('div');
+    const cabecalho = document.createElement('div');
+    cabecalho.className = 'cabecalho-item-painel';
+
+    const nome = document.createElement('strong');
+    nome.textContent = pessoa.nome || 'Pessoa não identificada';
+
+    const horario = document.createElement('span');
+    horario.textContent = 'Entrada • ' + (pessoa.dataHora || 'horário não informado');
+
+    cabecalho.appendChild(nome);
+    cabecalho.appendChild(horario);
+    informacoes.appendChild(cabecalho);
+    informacoes.appendChild(criarDetalhesPessoaPainel(pessoa));
+    item.appendChild(informacoes);
+
+    const botaoSaida = document.createElement('button');
+    botaoSaida.type = 'button';
+    botaoSaida.className = 'botao-saida-rapida';
+    botaoSaida.textContent = 'Registrar saída';
+    botaoSaida.onclick = () => confirmarSaidaRapidaPessoa(pessoa, botaoSaida);
+    item.appendChild(botaoSaida);
+    lista.appendChild(item);
+  });
+}
+
+function confirmarSaidaRapidaPessoa(pessoa, botao) {
+  abrirModalConfirmacao(
+    'Registrar saída',
+    'Confirma a saída de <strong>' + escaparHtml(pessoa.nome || 'pessoa não identificada') +
+      '</strong>?<br><br>O registro ficará vinculado ao guarda atualmente logado.',
+    () => registrarSaidaRapidaPessoaGuarda(pessoa.idMovimentacao, botao),
+    true
+  );
+}
+
+function registrarSaidaRapidaPessoaGuarda(idMovimentacaoEntrada, botao) {
+  if (botao) {
+    botao.disabled = true;
+    botao.textContent = 'Registrando...';
+  }
+
+  google.script.run
+    .withSuccessHandler((resposta) => {
+      mostrarMensagem(resposta.mensagem || 'Saída registrada com sucesso.', 'sucesso');
+      renderizarPessoasDentroGuarda(resposta.pessoasDentro || []);
+
+      const atualizadoEm = document.getElementById('atualizadoEmPessoasDentroGuarda');
+      if (atualizadoEm && resposta.atualizadoEm) {
+        atualizadoEm.textContent = 'Atualizado em ' + resposta.atualizadoEm;
+      }
+
+      if (aparelhoAssumiuComandanteAtual()) {
+        carregarPainelComandante(true);
+      }
+    })
+    .withFailureHandler((erro) => {
+      mostrarMensagem('Erro ao registrar saída: ' + erro.message, 'erro');
+
+      if (botao) {
+        botao.disabled = false;
+        botao.textContent = 'Registrar saída';
+      }
+
+      carregarPessoasDentroGuarda(true);
+    })
+    .registrarSaidaRapidaPessoa(idMovimentacaoEntrada);
+}
+
+function escaparHtml(valor) {
+  return String(valor || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function mostrarAreaTrocaComandante() {
   document.getElementById('areaAssumirComandante').classList.remove('oculto');
   mostrarMensagem(
@@ -2018,6 +2168,23 @@ function aparelhoAssumiuGuardaAtual() {
   );
 }
 
+function atualizarVisibilidadePessoasDentroGuarda() {
+  const card = document.getElementById('cardPessoasDentroGuarda');
+
+  if (!card) return;
+
+  if (aparelhoAssumiuGuardaAtual()) {
+    card.classList.remove('oculto');
+
+    if (!pessoasDentroGuardaCarregadas) {
+      carregarPessoasDentroGuarda(true);
+    }
+  } else {
+    card.classList.add('oculto');
+    pessoasDentroGuardaCarregadas = false;
+  }
+}
+
 function atualizarPermissaoLancamento() {
   const cardMovimentacao = document.getElementById('cardMovimentacao');
   const aviso = document.getElementById('avisoSemPermissaoLancamento');
@@ -2027,6 +2194,8 @@ function atualizarPermissaoLancamento() {
   }
 
   const podeLancar = guardaAtual && aparelhoAssumiuGuardaAtual();
+
+  atualizarVisibilidadePessoasDentroGuarda();
 
   if (podeLancar) {
     cardMovimentacao.classList.remove('oculto');
