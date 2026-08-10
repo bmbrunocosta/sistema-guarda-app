@@ -1693,12 +1693,49 @@ function carregarPessoasDentroGuarda(silencioso = false) {
     .getPessoasDentroGuarda();
 }
 
+function atualizarResumoPessoasDentroGuarda(pessoas) {
+  const resumo = document.getElementById('resumoPessoasDentroGuarda');
+
+  if (!resumo) return;
+
+  const total = Array.isArray(pessoas) ? pessoas.length : 0;
+  resumo.textContent = total === 1 ? '1 pessoa dentro' : total + ' pessoas dentro';
+}
+
+function definirPessoasDentroGuardaRecolhido(recolhido) {
+  const card = document.getElementById('cardPessoasDentroGuarda');
+  const conteudo = document.getElementById('conteudoPessoasDentroGuarda');
+  const botao = document.getElementById('btnAlternarPessoasDentroGuarda');
+
+  if (!card || !conteudo || !botao) return;
+
+  conteudo.hidden = recolhido;
+  card.classList.toggle('recolhido', recolhido);
+  botao.setAttribute('aria-expanded', recolhido ? 'false' : 'true');
+  localStorage.setItem('pessoas_dentro_recolhido', recolhido ? 'sim' : 'nao');
+}
+
+function alternarPessoasDentroGuarda() {
+  const conteudo = document.getElementById('conteudoPessoasDentroGuarda');
+
+  if (!conteudo) return;
+
+  definirPessoasDentroGuardaRecolhido(!conteudo.hidden);
+}
+
+function restaurarEstadoPessoasDentroGuarda() {
+  definirPessoasDentroGuardaRecolhido(
+    localStorage.getItem('pessoas_dentro_recolhido') === 'sim'
+  );
+}
+
 function renderizarPessoasDentroGuarda(pessoas) {
   const lista = document.getElementById('listaPessoasDentroGuarda');
 
   if (!lista) return;
 
   lista.innerHTML = '';
+  atualizarResumoPessoasDentroGuarda(pessoas);
 
   if (!pessoas.length) {
     lista.appendChild(criarEstadoVazioPainel('Nenhuma pessoa consta como dentro do quartel.'));
@@ -2175,6 +2212,7 @@ function atualizarVisibilidadePessoasDentroGuarda() {
 
   if (aparelhoAssumiuGuardaAtual()) {
     card.classList.remove('oculto');
+    restaurarEstadoPessoasDentroGuarda();
 
     if (!pessoasDentroGuardaCarregadas) {
       carregarPessoasDentroGuarda(true);
