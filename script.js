@@ -503,7 +503,171 @@ Object.defineProperty(window.google.script, 'run', {
     const chaveCondutor = pessoaSelecionada
       ? criarChaveParticipanteViatura(pessoaSelecionada)
       : criarChaveParticipanteViatura({
-          RG_CPF: document.getEleme…1783 tokens truncated…Viatura' ? 'Registrar viatura' : 'Registrar';
+          RG_CPF: document.getElementById('rgCondutorExterno').value.trim()
+        });
+
+    if (chaveCondutor && chaveCondutor === participante.chaveLista) {
+      mostrarMensagem('O condutor não pode ser adicionado também como ocupante.', 'erro');
+      return;
+    }
+
+    if (ocupantesViatura.some(item => item.chaveLista === participante.chaveLista)) {
+      mostrarMensagem('Este militar já está na lista de ocupantes.', 'erro');
+      return;
+    }
+
+    ocupantesViatura.push(participante);
+    document.getElementById('nomeOcupanteExterno').value = '';
+    document.getElementById('rgOcupanteExterno').value = '';
+    renderizarOcupantesViatura();
+    document.getElementById('nomeOcupanteExterno').focus();
+  }
+
+  function criarChaveParticipanteViatura(pessoa) {
+    const documento = String((pessoa && pessoa.RG_CPF) || '')
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, '');
+
+    if (documento) {
+      return 'DOC:' + documento;
+    }
+
+    const id = String((pessoa && pessoa.ID_Pessoa) || '').trim();
+    return id ? 'ID:' + id : '';
+  }
+
+  function removerOcupanteViatura(chaveLista) {
+    ocupantesViatura = ocupantesViatura.filter(item => item.chaveLista !== chaveLista);
+    renderizarOcupantesViatura();
+  }
+
+  function renderizarOcupantesViatura() {
+    const lista = document.getElementById('listaOcupantesViatura');
+    const contador = document.getElementById('contadorOcupantesViatura');
+
+    const quantidade = ocupantesViatura.length;
+    contador.textContent = quantidade === 1 ? '1 pessoa' : `${quantidade} pessoas`;
+    lista.innerHTML = '';
+    lista.classList.toggle('oculto', ocupantesViatura.length === 0);
+
+    ocupantesViatura.forEach(pessoa => {
+      const item = document.createElement('div');
+      item.className = 'ocupante-viatura';
+
+      const identificacao = document.createElement('div');
+      const nome = document.createElement('strong');
+      const documento = document.createElement('span');
+      const origem = document.createElement('small');
+      nome.textContent = pessoa.Nome;
+      documento.textContent = pessoa.RG_CPF;
+      origem.textContent = String(pessoa.origem || '').toLowerCase() === 'manual'
+        ? 'Não cadastrado'
+        : 'Cadastrado';
+      identificacao.appendChild(nome);
+      identificacao.appendChild(documento);
+      identificacao.appendChild(origem);
+      item.appendChild(identificacao);
+
+      const remover = document.createElement('button');
+      remover.type = 'button';
+      remover.textContent = 'Remover';
+      remover.onclick = () => removerOcupanteViatura(pessoa.chaveLista);
+      item.appendChild(remover);
+      lista.appendChild(item);
+    });
+  }
+
+  function registrarMovimentacao() {
+    const tipoRegistro = document.getElementById('tipoRegistro').value;
+
+    const dados = {
+      modoRegistro: modoRegistroAtual,
+      tipoMovimentacao: tipoMovimentacaoAtual,
+      tipoRegistro: tipoRegistro,
+      pessoaCadastrada: pessoaSelecionada,
+      condutorExterno: condutorExternoAtivo ? {
+        origem: 'Manual',
+        Nome: document.getElementById('nomeCondutorExterno').value.trim(),
+        RG_CPF: document.getElementById('rgCondutorExterno').value.trim()
+      } : null,
+      nomeVisitante: document.getElementById('nomeVisitante').value.trim(),
+      rgCpfVisitante: document.getElementById('rgCpfVisitante').value.trim(),
+      destino: document.getElementById('destino').value,
+      procedencia: document.getElementById('procedencia').value,
+      complementoProcedencia: document.getElementById('complementoProcedencia').value.trim(),
+      prefixoPlaca: document.getElementById('prefixoPlaca').value.replace(/\s+/g, '').toUpperCase(),
+      observacoes: document.getElementById('observacoes').value.trim(),
+      ocupantesViatura: ocupantesViatura
+    };
+
+    if (modoRegistroAtual === 'Viatura') {
+      if (!pessoaSelecionada && !condutorExternoAtivo) {
+        mostrarMensagem('Selecione um condutor cadastrado ou informe um condutor externo.', 'erro');
+        return;
+      }
+
+      if (
+        condutorExternoAtivo &&
+        (!dados.condutorExterno.Nome || !dados.condutorExterno.RG_CPF)
+      ) {
+        mostrarMensagem('Informe o nome e o documento do condutor externo.', 'erro');
+        return;
+      }
+
+      if (!dados.prefixoPlaca) {
+        mostrarMensagem('Informe o prefixo ou a placa da viatura.', 'erro');
+        return;
+      }
+
+      if (ocupantesViatura.length === 0) {
+        mostrarMensagem('Adicione ao menos um ocupante da viatura.', 'erro');
+        return;
+      }
+    }
+
+    if (tipoRegistro === 'Pessoa cadastrada' && !pessoaSelecionada) {
+      mostrarMensagem('Busque e selecione uma pessoa cadastrada antes de registrar.', 'erro');
+      return;
+    }
+
+    if (tipoRegistro === 'Visitante eventual') {
+      if (!dados.nomeVisitante) {
+        mostrarMensagem('Informe o nome do visitante.', 'erro');
+        return;
+      }
+
+      if (!dados.rgCpfVisitante) {
+        mostrarMensagem('Informe o RG/CPF do visitante.', 'erro');
+        return;
+      }
+    }
+
+    const areaComplemento = document.getElementById('areaComplementoProcedencia');
+    const complementoVisivel = !areaComplemento.classList.contains('oculto');
+
+    if (complementoVisivel && !dados.complementoProcedencia) {
+      mostrarMensagem('Informe o complemento da procedência.', 'erro');
+      return;
+    }
+
+    const botao = document.getElementById('btnRegistrarMovimentacao');
+    botao.disabled = true;
+    botao.textContent = 'Registrando...';
+
+    google.script.run
+      .withSuccessHandler((resposta) => {
+        mostrarMensagem(resposta.mensagem || 'Movimentação registrada com sucesso.', 'sucesso');
+        limparFormulario();
+
+        botao.disabled = false;
+        botao.textContent = modoRegistroAtual === 'Viatura' ? 'Registrar viatura' : 'Registrar';
+      })
+      .withFailureHandler((erro) => {
+        mostrarMensagem('Erro ao registrar movimentação: ' + erro.message, 'erro');
+
+        botao.disabled = false;
+        botao.textContent = modoRegistroAtual === 'Viatura' ? 'Registrar viatura' : 'Registrar';
       })
       .registrarMovimentacao(dados);
   }
