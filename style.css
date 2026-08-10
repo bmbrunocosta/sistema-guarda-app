@@ -131,37 +131,6 @@
     color: #c2410c;
   }
 
-  .cadastro-viatura-painel {
-    margin-top: 12px;
-    padding: 12px;
-    border: 1px dashed #94a3b8;
-    border-radius: 12px;
-    background: #f8fafc;
-  }
-
-  .cadastro-viatura-painel > strong {
-    display: block;
-    margin-bottom: 9px;
-    color: #334155;
-    font-size: 13px;
-  }
-
-  .grade-cadastro-viatura {
-    display: grid;
-    grid-template-columns: 0.7fr 1.3fr;
-    gap: 8px;
-  }
-
-  .grade-cadastro-viatura button {
-    grid-column: 1 / -1;
-    min-height: 42px;
-    border: none;
-    border-radius: 11px;
-    background: #0f766e;
-    color: white;
-    font-weight: 700;
-  }
-
   .item-viatura-quartel.viatura-disponivel {
     border-left-color: #16a34a;
   }
