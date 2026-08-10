@@ -12,13 +12,13 @@
     <div class="app">
       <header class="topo">
         <h1>Controle de Acesso</h1>
-        <p>Registro de entrada e saída da Guarda</p>
+        <p>Registro de entrada e saÃ­da da Guarda</p>
       </header>
 
       <main class="conteudo">
         <section class="card card-guarda">
           <div class="cabecalho-card-guarda">
-            <h2>Guarda de Serviço</h2>
+            <h2>Guarda de ServiÃ§o</h2>
 
             <div class="acoes-guarda">
               <button type="button" id="btnTrocarGuarda" class="botao-trocar oculto" onclick="mostrarAreaTrocaGuarda()">
@@ -37,9 +37,9 @@
 
           <div id="areaCodigoEncerrarGuarda" class="oculto">
             <div class="campo">
-              <label>Código enviado ao guarda atual</label>
+              <label>CÃ³digo enviado ao guarda atual</label>
               <div class="linha-busca">
-                <input type="text" id="codigoEncerrarGuarda" placeholder="Digite o código">
+                <input type="text" id="codigoEncerrarGuarda" placeholder="Digite o cÃ³digo">
                 <button type="button" onclick="validarCodigoEEncerrarGuarda()">Validar</button>
               </div>
             </div>
@@ -56,9 +56,9 @@
 
             <div id="areaCodigoGuarda" class="oculto">
               <div class="campo">
-                <label>Código recebido por e-mail</label>
+                <label>CÃ³digo recebido por e-mail</label>
                 <div class="linha-busca">
-                  <input type="text" id="codigoGuarda" placeholder="Digite o código">
+                  <input type="text" id="codigoGuarda" placeholder="Digite o cÃ³digo">
                   <button type="button" onclick="validarCodigoGuarda()">Validar</button>
                 </div>
               </div>
@@ -84,13 +84,69 @@
           </div>
           
         </section>
-        
+
+        <section class="card card-guarda card-comandante">
+          <div class="cabecalho-card-guarda">
+            <h2>Comandante da Guarda</h2>
+
+            <div class="acoes-guarda">
+              <button type="button" id="btnTrocarComandante" class="botao-trocar oculto" onclick="mostrarAreaTrocaComandante()">
+                Assumir / Trocar
+              </button>
+
+              <button type="button" id="btnEncerrarComandante" class="botao-sair oculto" onclick="encerrarComandante()">
+                Sair
+              </button>
+            </div>
+          </div>
+
+          <div id="statusComandante" class="status-guarda">
+            Carregando comandante atual...
+          </div>
+
+          <div id="areaCodigoEncerrarComandante" class="oculto">
+            <div class="campo">
+              <label>CÃ³digo enviado ao comandante atual</label>
+              <div class="linha-busca">
+                <input type="text" id="codigoEncerrarComandante" inputmode="numeric" placeholder="Digite o cÃ³digo">
+                <button type="button" onclick="validarCodigoEEncerrarComandante()">Validar</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="areaAssumirComandante">
+            <div class="campo">
+              <label>E-mail do militar</label>
+              <div class="linha-busca">
+                <input type="email" id="emailComandante" placeholder="Digite o e-mail cadastrado">
+                <button type="button" onclick="enviarCodigoComandante()">Enviar</button>
+              </div>
+            </div>
+
+            <div id="areaCodigoComandante" class="oculto">
+              <div class="campo">
+                <label>CÃ³digo recebido por e-mail</label>
+                <div class="linha-busca">
+                  <input type="text" id="codigoComandante" inputmode="numeric" placeholder="Digite o cÃ³digo">
+                  <button type="button" onclick="validarCodigoComandante()">Validar</button>
+                </div>
+              </div>
+            </div>
+
+            <div id="areaComandanteIdentificado" class="resultado oculto"></div>
+
+            <button type="button" id="btnAssumirComandante" class="botao-secundario oculto" onclick="assumirComandante()">
+              Assumir como comandante
+            </button>
+          </div>
+        </section>
+
         <div id="avisoSemPermissaoLancamento" class="aviso-bloqueio oculto">
-          Este celular ainda não está autorizado para a Guarda atual. Se você está assumindo o serviço, toque em “Assumir / Trocar” e valide seu e-mail.
+          Este celular ainda nÃ£o estÃ¡ autorizado para a Guarda atual. Se vocÃª estÃ¡ assumindo o serviÃ§o, toque em â€œAssumir / Trocarâ€ e valide seu e-mail.
         </div>
 
         <section class="card" id="cardMovimentacao">
-          <h2>Registrar Movimentação</h2>
+          <h2>Registrar MovimentaÃ§Ã£o</h2>
 
           <div class="campo">
             <label>Forma do registro</label>
@@ -101,10 +157,10 @@
           </div>
 
           <div class="campo">
-            <label>Tipo de movimentação</label>
+            <label>Tipo de movimentaÃ§Ã£o</label>
             <div class="botoes-segmentados">
               <button type="button" class="ativo" id="btnEntrada" onclick="selecionarMovimentacao('Entrada')">Entrada</button>
-              <button type="button" id="btnSaida" onclick="selecionarMovimentacao('Saída')">Saída</button>
+              <button type="button" id="btnSaida" onclick="selecionarMovimentacao('SaÃ­da')">SaÃ­da</button>
             </div>
           </div>
 
@@ -129,15 +185,15 @@
 
             <div id="areaOpcaoCondutorExterno" class="opcao-militar-externo oculto">
               <button type="button" onclick="alternarCondutorExterno()">
-                Condutor não cadastrado
+                Condutor nÃ£o cadastrado
               </button>
             </div>
 
             <div id="areaCondutorExterno" class="dados-militar-externo oculto">
-              <strong>Identificação manual do condutor</strong>
+              <strong>IdentificaÃ§Ã£o manual do condutor</strong>
               <div class="campo">
-                <label>Posto/graduação e nome</label>
-                <input type="text" id="nomeCondutorExterno" placeholder="Ex.: 2º SGT SILVA">
+                <label>Posto/graduaÃ§Ã£o e nome</label>
+                <input type="text" id="nomeCondutorExterno" placeholder="Ex.: 2Âº SGT SILVA">
               </div>
               <div class="campo campo-sem-margem">
                 <label>RG/CPF ou identidade funcional</label>
@@ -153,7 +209,7 @@
             <div class="titulo-bloco-viatura">
               <div>
                 <strong>Pessoas dentro da viatura</strong>
-                <span>Inclua todos além do condutor. É possível misturar cadastrados e não cadastrados.</span>
+                <span>Inclua todos alÃ©m do condutor. Ã‰ possÃ­vel misturar cadastrados e nÃ£o cadastrados.</span>
               </div>
               <span id="contadorOcupantesViatura" class="contador-ocupantes">0 pessoas</span>
             </div>
@@ -163,7 +219,7 @@
             <div class="campo campo-sem-margem">
               <label>RG/CPF da pessoa</label>
               <div class="linha-busca">
-                <input type="text" id="rgCpfBuscaOcupante" placeholder="Digite ao menos 3 dígitos">
+                <input type="text" id="rgCpfBuscaOcupante" placeholder="Digite ao menos 3 dÃ­gitos">
                 <button type="button" onclick="buscarOcupanteViatura()">Buscar</button>
               </div>
             </div>
@@ -172,14 +228,14 @@
 
             <div class="opcao-militar-externo">
               <button type="button" onclick="alternarFormularioOcupanteExterno()">
-                + Adicionar pessoa não cadastrada
+                + Adicionar pessoa nÃ£o cadastrada
               </button>
             </div>
 
             <div id="areaOcupanteExterno" class="dados-militar-externo oculto">
-              <strong>Identificação manual do ocupante</strong>
+              <strong>IdentificaÃ§Ã£o manual do ocupante</strong>
               <div class="campo">
-                <label>Posto/graduação e nome</label>
+                <label>Posto/graduaÃ§Ã£o e nome</label>
                 <input type="text" id="nomeOcupanteExterno" placeholder="Ex.: CB COSTA">
               </div>
               <div class="campo">
@@ -187,13 +243,13 @@
                 <input type="text" id="rgOcupanteExterno" placeholder="Documento do militar">
               </div>
               <button type="button" class="botao-adicionar-externo" onclick="adicionarOcupanteExterno()">
-                Adicionar pessoa à viatura
+                Adicionar pessoa Ã  viatura
               </button>
             </div>
 
             <div id="listaOcupantesViatura" class="lista-ocupantes oculto"></div>
             <div class="dica-varios-ocupantes">
-              Depois de adicionar uma pessoa, continue usando as opções acima até completar todos os ocupantes.
+              Depois de adicionar uma pessoa, continue usando as opÃ§Ãµes acima atÃ© completar todos os ocupantes.
             </div>
           </div>
 
@@ -215,12 +271,12 @@
           </div>
 
           <div class="campo">
-            <label>Procedência</label>
+            <label>ProcedÃªncia</label>
             <select id="procedencia" onchange="verificarComplementoProcedencia()"></select>
           </div>
 
           <div id="areaComplementoProcedencia" class="campo oculto">
-            <label id="labelComplementoProcedencia">Complemento da procedência</label>
+            <label id="labelComplementoProcedencia">Complemento da procedÃªncia</label>
             <input type="text" id="complementoProcedencia" placeholder="Informe o complemento">
           </div>
 
@@ -230,7 +286,7 @@
           </div>
 
           <div class="campo">
-            <label>Observações</label>
+            <label>ObservaÃ§Ãµes</label>
             <textarea id="observacoes" placeholder="Opcional"></textarea>
           </div>
 
@@ -245,7 +301,7 @@
 
     <div id="modalConfirmacao" class="modal-fundo oculto">
       <div class="modal-card">
-        <h3 id="modalTitulo">Confirmar ação</h3>
+        <h3 id="modalTitulo">Confirmar aÃ§Ã£o</h3>
         <p id="modalTexto">Deseja continuar?</p>
 
         <div class="modal-botoes">
@@ -260,6 +316,6 @@
       </div>
     </div>
 
-    <script src="script.js?v=4.0.3"></script>
+    <script src="script.js?v=5.0.0"></script>
   </body>
 </html>
