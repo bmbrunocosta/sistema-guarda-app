@@ -65,6 +65,152 @@
   border-top: 4px solid #2563eb;
 }
 
+  .painel-comandante {
+    margin-bottom: 14px;
+    border-top: 4px solid #0f766e;
+  }
+
+  .cabecalho-painel-comandante {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .cabecalho-painel-comandante h2 {
+    margin: 0 0 4px;
+  }
+
+  .cabecalho-painel-comandante span {
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .cabecalho-painel-comandante button {
+    flex: 0 0 auto;
+    min-height: 36px;
+    padding: 8px 11px;
+    border: none;
+    border-radius: 10px;
+    background: #0f766e;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .resumo-painel-comandante {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .indicador-painel {
+    min-width: 0;
+    padding: 12px 8px;
+    border-radius: 13px;
+    background: #f0fdfa;
+    border: 1px solid #99f6e4;
+    text-align: center;
+  }
+
+  .indicador-painel strong,
+  .indicador-painel span {
+    display: block;
+  }
+
+  .indicador-painel strong {
+    color: #115e59;
+    font-size: 23px;
+    line-height: 1;
+  }
+
+  .indicador-painel span {
+    margin-top: 6px;
+    color: #475569;
+    font-size: 11px;
+    line-height: 1.2;
+  }
+
+  .secao-painel-comandante + .secao-painel-comandante {
+    margin-top: 20px;
+  }
+
+  .secao-painel-comandante h3 {
+    margin: 0 0 10px;
+    color: #1e293b;
+    font-size: 17px;
+  }
+
+  .lista-painel {
+    display: grid;
+    gap: 8px;
+  }
+
+  .item-painel {
+    padding: 11px 12px;
+    border: 1px solid #e2e8f0;
+    border-left-width: 4px;
+    border-radius: 11px;
+    background: #f8fafc;
+  }
+
+  .item-dentro,
+  .movimentacao-entrada {
+    border-left-color: #16a34a;
+  }
+
+  .movimentacao-saida {
+    border-left-color: #dc2626;
+  }
+
+  .cabecalho-item-painel {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .cabecalho-item-painel strong {
+    color: #0f172a;
+    font-size: 14px;
+    line-height: 1.25;
+  }
+
+  .cabecalho-item-painel span {
+    flex: 0 0 auto;
+    color: #64748b;
+    font-size: 11px;
+    text-align: right;
+  }
+
+  .detalhes-item-painel {
+    margin-top: 5px;
+    color: #475569;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .estado-vazio-painel {
+    padding: 15px 12px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 11px;
+    color: #64748b;
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .rodape-painel-comandante {
+    margin-top: 14px;
+    color: #94a3b8;
+    font-size: 11px;
+    text-align: right;
+  }
+
+
   .card h2 {
     margin: 0 0 18px;
     font-size: 21px;
