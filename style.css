@@ -30,6 +30,21 @@
     padding: 22px 18px 20px;
     border-bottom-left-radius: 22px;
     border-bottom-right-radius: 22px;
+    text-align: center;
+  }
+
+  .topo-brasao {
+    margin-bottom: 10px;
+  }
+
+  .topo-brasao img {
+    display: inline-block;
+    width: 82px;
+    height: 82px;
+    padding: 2px;
+    border-radius: 50%;
+    background: white;
+    object-fit: contain;
   }
 
   .topo h1 {
