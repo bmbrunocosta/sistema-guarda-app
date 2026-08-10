@@ -103,7 +103,7 @@
 
   .resumo-painel-comandante {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
     margin-bottom: 20px;
   }
@@ -120,6 +120,55 @@
   .indicador-painel strong,
   .indicador-painel span {
     display: block;
+  }
+
+  .indicador-painel.indicador-alerta {
+    background: #fff7ed;
+    border-color: #fdba74;
+  }
+
+  .indicador-painel.indicador-alerta strong {
+    color: #c2410c;
+  }
+
+  .cadastro-viatura-painel {
+    margin-top: 12px;
+    padding: 12px;
+    border: 1px dashed #94a3b8;
+    border-radius: 12px;
+    background: #f8fafc;
+  }
+
+  .cadastro-viatura-painel > strong {
+    display: block;
+    margin-bottom: 9px;
+    color: #334155;
+    font-size: 13px;
+  }
+
+  .grade-cadastro-viatura {
+    display: grid;
+    grid-template-columns: 0.7fr 1.3fr;
+    gap: 8px;
+  }
+
+  .grade-cadastro-viatura button {
+    grid-column: 1 / -1;
+    min-height: 42px;
+    border: none;
+    border-radius: 11px;
+    background: #0f766e;
+    color: white;
+    font-weight: 700;
+  }
+
+  .item-viatura-quartel.viatura-disponivel {
+    border-left-color: #16a34a;
+  }
+
+  .item-viatura-quartel.viatura-em-sos {
+    border-left-color: #f97316;
+    background: #fff7ed;
   }
 
   .indicador-painel strong {
@@ -338,12 +387,121 @@
     font-weight: 700;
   }
 
+  #botoesModoRegistro {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
   .bloco-viatura {
     margin-bottom: 16px;
     padding: 14px;
     border: 1px solid #bfdbfe;
     border-radius: 15px;
     background: #eff6ff;
+  }
+
+  .bloco-sos {
+    margin-bottom: 16px;
+    padding: 14px;
+    border: 1px solid #fdba74;
+    border-radius: 15px;
+    background: #fff7ed;
+  }
+
+  .lista-selecao-sos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .opcao-viatura-sos {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 11px;
+    border: 1px solid #fed7aa;
+    border-radius: 11px;
+    background: white;
+    cursor: pointer;
+  }
+
+  .opcao-viatura-sos input {
+    width: 20px;
+    min-height: 20px;
+    margin: 0;
+  }
+
+  .opcao-viatura-sos strong,
+  .opcao-viatura-sos small {
+    display: block;
+  }
+
+  .opcao-viatura-sos strong {
+    color: #9a3412;
+    font-size: 14px;
+  }
+
+  .opcao-viatura-sos small {
+    margin-top: 2px;
+    color: #64748b;
+    font-size: 11px;
+  }
+
+  .configuracoes-sos {
+    display: grid;
+    gap: 10px;
+    margin: 12px 0;
+  }
+
+  .configuracao-viatura-sos {
+    padding: 12px;
+    border: 1px solid #fed7aa;
+    border-radius: 12px;
+    background: white;
+  }
+
+  .configuracao-viatura-sos > strong {
+    display: block;
+    margin-bottom: 10px;
+    color: #9a3412;
+  }
+
+  .configuracao-viatura-sos > label {
+    margin-top: 10px;
+    font-size: 12px;
+  }
+
+  .linha-adicionar-guarnicao {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+  }
+
+  .linha-adicionar-guarnicao button {
+    min-height: 48px;
+    padding: 0 12px;
+    border: none;
+    border-radius: 11px;
+    background: #c2410c;
+    color: white;
+    font-weight: 700;
+  }
+
+  .chips-guarnicao {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .chips-guarnicao button {
+    padding: 6px 9px;
+    border: 1px solid #fdba74;
+    border-radius: 999px;
+    background: #ffedd5;
+    color: #9a3412;
+    font-size: 11px;
+    font-weight: 700;
   }
 
   .opcao-militar-externo {
