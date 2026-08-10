@@ -59,8 +59,6 @@ function montarDadosChamadaApi(nome, argumentos) {
       return { sessaoToken: sessaoComandanteToken };
     case 'getDadosSOS':
       return { sessaoToken: sessaoToken };
-    case 'cadastrarViatura':
-      return { viatura: argumentos[0], sessaoToken: sessaoComandanteToken };
     case 'registrarMovimentacaoSOS':
       return { sos: argumentos[0], sessaoToken: sessaoToken };
     case 'buscarPessoasPorRgCpf':
@@ -165,7 +163,6 @@ function criarExecutorAppsScript() {
     'getComandanteAtivo',
     'getPainelComandante',
     'getDadosSOS',
-    'cadastrarViatura',
     'registrarMovimentacaoSOS',
     'buscarPessoasPorRgCpf',
     'registrarMovimentacao',
@@ -1551,39 +1548,6 @@ function renderizarViaturasQuartelPainel(viaturas) {
 
     lista.appendChild(item);
   });
-}
-
-function cadastrarViaturaQuartel() {
-  const prefixo = document.getElementById('prefixoNovaViatura').value.replace(/\s+/g, '').toUpperCase();
-  const descricao = document.getElementById('descricaoNovaViatura').value.trim();
-
-  if (!prefixo) {
-    mostrarMensagem('Informe o prefixo da viatura.', 'erro');
-    return;
-  }
-
-  const botao = document.getElementById('btnCadastrarViatura');
-  botao.disabled = true;
-  botao.textContent = 'Cadastrando...';
-
-  google.script.run
-    .withSuccessHandler((resposta) => {
-      mostrarMensagem(resposta.mensagem || 'Viatura cadastrada.', 'sucesso');
-      document.getElementById('prefixoNovaViatura').value = '';
-      document.getElementById('descricaoNovaViatura').value = '';
-      viaturasSOS = resposta.dadosSOS ? resposta.dadosSOS.viaturas || [] : viaturasSOS;
-      militaresSOS = resposta.dadosSOS ? resposta.dadosSOS.militares || [] : militaresSOS;
-      renderizarSelecaoViaturasSOS();
-      carregarPainelComandante(true);
-      botao.disabled = false;
-      botao.textContent = 'Cadastrar';
-    })
-    .withFailureHandler((erro) => {
-      mostrarMensagem('Erro ao cadastrar viatura: ' + erro.message, 'erro');
-      botao.disabled = false;
-      botao.textContent = 'Cadastrar';
-    })
-    .cadastrarViatura({ prefixo: prefixo, descricao: descricao });
 }
 
 function renderizarListaPessoasDentro(pessoas) {
