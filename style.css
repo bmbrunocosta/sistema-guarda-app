@@ -65,10 +65,70 @@
   border-top: 4px solid #2563eb;
 }
 
-  .painel-comandante {
-    margin-bottom: 14px;
-    border-top: 4px solid #0f766e;
-  }
+.painel-comandante {
+  margin-bottom: 14px;
+  border-top: 4px solid #0f766e;
+}
+
+.card-pessoas-dentro-guarda {
+  border-top: 4px solid #16a34a;
+}
+
+.cabecalho-pessoas-dentro-guarda {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.cabecalho-pessoas-dentro-guarda h2 {
+  margin: 0 0 4px;
+}
+
+.cabecalho-pessoas-dentro-guarda p {
+  margin: 0;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.cabecalho-pessoas-dentro-guarda button {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 8px 11px;
+  border: none;
+  border-radius: 10px;
+  background: #166534;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.item-pessoa-dentro-guarda {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.botao-saida-rapida {
+  min-height: 38px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 10px;
+  background: #dc2626;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.botao-saida-rapida:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
 
   .cabecalho-painel-comandante {
     display: flex;
