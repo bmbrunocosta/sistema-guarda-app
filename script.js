@@ -1949,7 +1949,7 @@ function assumirComandante(encerrarAnterior = false) {
 function encerrarComandante() {
   abrirModalConfirmacao(
     'Encerrar Comandante da Guarda',
-    'Será enviado um código para o e-mail do comandante atual.<br><br>Deseja continuar?',
+    'Será enviado um código para o e-mail do comandante atual.<br><br>Após a confirmação, o relatório das 08h às 08h será criado, arquivado no Drive da Guarda e enviado ao comandante.<br><br>Deseja continuar?',
     () => enviarCodigoParaEncerrarComandante(),
     true
   );
