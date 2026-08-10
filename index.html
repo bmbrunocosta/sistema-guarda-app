@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#111827">
     <title>Controle de Acesso - Guarda</title>
-    <link rel="stylesheet" href="style.css?v=8.0.0">
+  <link rel="stylesheet" href="style.css?v=9.0.0">
   </head>
 
   <body>
@@ -83,6 +83,24 @@
             </button>
           </div>
           
+        </section>
+
+        <section class="card card-pessoas-dentro-guarda oculto" id="cardPessoasDentroGuarda">
+          <div class="cabecalho-pessoas-dentro-guarda">
+            <div>
+              <h2>Pessoas atualmente dentro</h2>
+              <p>Confira quem ainda não possui saída registrada.</p>
+            </div>
+            <button type="button" id="btnAtualizarPessoasDentroGuarda" onclick="carregarPessoasDentroGuarda()">
+              Atualizar
+            </button>
+          </div>
+
+          <div id="listaPessoasDentroGuarda" class="lista-painel">
+            <div class="estado-vazio-painel">Carregando...</div>
+          </div>
+
+          <div id="atualizadoEmPessoasDentroGuarda" class="rodape-painel-comandante"></div>
         </section>
 
         <section class="card card-guarda card-comandante">
@@ -391,6 +409,6 @@
       </div>
     </div>
 
-    <script src="script.js?v=8.0.0"></script>
+  <script src="script.js?v=9.0.0"></script>
   </body>
 </html>
