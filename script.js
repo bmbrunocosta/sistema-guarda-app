@@ -759,7 +759,7 @@ Object.defineProperty(window.google.script, 'run', {
 
     } else {
       status.classList.add('sem-guarda');
-      status.textContent = 'Nenhum guarda ativo. Valide o e-mail para assumir a Guarda.';
+      status.textContent = 'Nenhum guarda ativo. Valide seu e-mail para assumir a Guarda neste celular.';
 
       areaAssumir.classList.remove('oculto');
 
@@ -779,7 +779,7 @@ Object.defineProperty(window.google.script, 'run', {
 
   function mostrarAreaTrocaGuarda() {
     document.getElementById('areaAssumirGuarda').classList.remove('oculto');
-    mostrarMensagem('Informe o e-mail do novo guarda para realizar a troca.', 'sucesso');
+    mostrarMensagem('Informe seu e-mail para assumir a Guarda neste celular. A sessão anterior será encerrada após a confirmação.', 'sucesso');
   }  
 
   function enviarCodigoGuarda() {
@@ -883,7 +883,7 @@ Object.defineProperty(window.google.script, 'run', {
     google.script.run
       .withSuccessHandler((resposta) => {
         botao.disabled = false;
-        botao.textContent = 'Assumir Guarda';
+        botao.textContent = 'Assumir neste celular';
 
         if (resposta && resposta.requerConfirmacaoTroca && resposta.guardaAtivo) {
           const g = resposta.guardaAtivo;
@@ -892,7 +892,7 @@ Object.defineProperty(window.google.script, 'run', {
             'Guarda já assumida',
             `Já existe um guarda ativo:<br><br>
             <strong>${g.Nome_Guarda} — RG ${g.RG_Guarda}</strong><br><br>
-            Deseja encerrar este guarda e assumir com o novo militar?`,
+            Deseja encerrar a sessão anterior e assumir a Guarda neste celular?`,
             () => assumirGuarda(true),
             true
           );
@@ -905,7 +905,7 @@ Object.defineProperty(window.google.script, 'run', {
         if (resposta && resposta.guarda) {
           guardaAtual = resposta.guarda;
 
-          // Marca este aparelho como o aparelho que assumiu a Guarda.
+          // Autoriza o celular pessoal usado pelo guarda durante este serviço.
           salvarGuardaLocal(resposta.guarda);
 
           atualizarTelaGuarda();
@@ -917,7 +917,7 @@ Object.defineProperty(window.google.script, 'run', {
         mostrarMensagem('Erro ao assumir Guarda: ' + erro.message, 'erro');
 
         botao.disabled = false;
-        botao.textContent = 'Assumir Guarda';
+        botao.textContent = 'Assumir neste celular';
       })
       .assumirGuardaComEmailValidado(dados);
   }
@@ -925,7 +925,7 @@ Object.defineProperty(window.google.script, 'run', {
   function encerrarGuarda() {
     abrirModalConfirmacao(
       'Encerrar Guarda',
-      'Para encerrar a Guarda, será enviado um código para o e-mail do guarda atualmente logado.<br><br>Deseja enviar o código?',
+      'Para encerrar a Guarda, será enviado um código para o e-mail do guarda atual.<br><br>Deseja enviar o código?',
       () => enviarCodigoParaEncerrarGuarda(),
       true
     );
