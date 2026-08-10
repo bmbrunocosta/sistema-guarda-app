@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#111827">
+    <title>Controle de Acesso - Guarda</title>
+    <link rel="stylesheet" href="style.css?v=4.0.0">
+  </head>
+
+  <body>
+    <div class="app">
+      <header class="topo">
+        <h1>Controle de Acesso</h1>
+        <p>Registro de entrada e saída da Guarda</p>
+      </header>
+
+      <main class="conteudo">
+        <section class="card card-guarda">
+          <div class="cabecalho-card-guarda">
+            <h2>Guarda de Serviço</h2>
+
+            <div class="acoes-guarda">
+              <button type="button" id="btnTrocarGuarda" class="botao-trocar oculto" onclick="mostrarAreaTrocaGuarda()">
+                Trocar
+              </button>
+
+              <button type="button" id="btnEncerrarGuarda" class="botao-sair oculto" onclick="encerrarGuarda()">
+                Sair
+              </button>
+            </div>
+          </div>
+
+          <div id="statusGuarda" class="status-guarda">
+            Carregando guarda atual...
+          </div>
+
+          <div id="areaCodigoEncerrarGuarda" class="oculto">
+            <div class="campo">
+              <label>Código enviado ao guarda atual</label>
+              <div class="linha-busca">
+                <input type="text" id="codigoEncerrarGuarda" placeholder="Digite o código">
+                <button type="button" onclick="validarCodigoEEncerrarGuarda()">Validar</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="areaAssumirGuarda">
+            <div class="campo">
+              <label>E-mail do militar</label>
+              <div class="linha-busca">
+                <input type="email" id="emailGuarda" placeholder="Digite o e-mail">
+                <button type="button" onclick="enviarCodigoGuarda()">Enviar</button>
+              </div>
+            </div>
+
+            <div id="areaCodigoGuarda" class="oculto">
+              <div class="campo">
+                <label>Código recebido por e-mail</label>
+                <div class="linha-busca">
+                  <input type="text" id="codigoGuarda" placeholder="Digite o código">
+                  <button type="button" onclick="validarCodigoGuarda()">Validar</button>
+                </div>
+              </div>
+            </div>
+
+            <div id="areaMilitarIdentificado" class="resultado oculto"></div>
+
+            <div id="areaIdentificacaoManual" class="oculto">
+              <div class="campo">
+                <label>RG do militar</label>
+                <input type="text" id="rgGuardaManual" placeholder="RG do militar">
+              </div>
+
+              <div class="campo">
+                <label>Nome do militar</label>
+                <input type="text" id="nomeGuardaManual" placeholder="Ex.: CB COSTA">
+              </div>
+            </div>
+
+            <button type="button" id="btnAssumirGuarda" class="botao-secundario oculto" onclick="assumirGuarda()">
+              Assumir Guarda
+            </button>
+          </div>
+          
+        </section>
+        
+        <div id="avisoSemPermissaoLancamento" class="aviso-bloqueio oculto">
+          Este aparelho não assumiu a Guarda atual. Para lançar movimentações, é necessário assumir ou trocar a Guarda.
+        </div>
+
+        <section class="card" id="cardMovimentacao">
+          <h2>Registrar Movimentação</h2>
+
+          <div class="campo">
+            <label>Forma do registro</label>
+            <div class="botoes-segmentados">
+              <button type="button" class="ativo" id="btnModoIndividual" onclick="selecionarModoRegistro('Individual')">Individual</button>
+              <button type="button" id="btnModoViatura" onclick="selecionarModoRegistro('Viatura')">Viatura</button>
+            </div>
+          </div>
+
+          <div class="campo">
+            <label>Tipo de movimentação</label>
+            <div class="botoes-segmentados">
+              <button type="button" class="ativo" id="btnEntrada" onclick="selecionarMovimentacao('Entrada')">Entrada</button>
+              <button type="button" id="btnSaida" onclick="selecionarMovimentacao('Saída')">Saída</button>
+            </div>
+          </div>
+
+          <div class="campo" id="campoTipoRegistro">
+            <label>Tipo de registro</label>
+            <select id="tipoRegistro" onchange="alternarTipoRegistro()">
+              <option value="Pessoa cadastrada">Pessoa cadastrada</option>
+              <option value="Visitante eventual">Visitante eventual</option>
+            </select>
+          </div>
+
+          <div id="areaPessoaCadastrada">
+            <div class="campo" id="campoBuscaPessoaPrincipal">
+              <label id="labelPessoaPrincipal">RG/CPF da pessoa cadastrada</label>
+              <div class="linha-busca">
+                <input type="text" id="rgCpfBusca" placeholder="Digite o RG ou CPF">
+                <button type="button" onclick="buscarPessoa()">Buscar</button>
+              </div>
+            </div>
+
+            <div id="resultadoPessoa" class="resultado oculto"></div>
+
+            <div id="areaOpcaoCondutorExterno" class="opcao-militar-externo oculto">
+              <button type="button" onclick="alternarCondutorExterno()">
+                Condutor não cadastrado
+              </button>
+            </div>
+
+            <div id="areaCondutorExterno" class="dados-militar-externo oculto">
+              <strong>Identificação manual do condutor</strong>
+              <div class="campo">
+                <label>Posto/graduação e nome</label>
+                <input type="text" id="nomeCondutorExterno" placeholder="Ex.: 2º SGT SILVA">
+              </div>
+              <div class="campo campo-sem-margem">
+                <label>RG/CPF ou identidade funcional</label>
+                <input type="text" id="rgCondutorExterno" placeholder="Documento do militar">
+              </div>
+              <button type="button" class="botao-voltar-busca" onclick="alternarCondutorExterno()">
+                Voltar para busca no cadastro
+              </button>
+            </div>
+          </div>
+
+          <div id="areaOcupantesViatura" class="bloco-viatura oculto">
+            <div class="titulo-bloco-viatura">
+              <div>
+                <strong>Pessoas dentro da viatura</strong>
+                <span>Inclua todos além do condutor. É possível misturar cadastrados e não cadastrados.</span>
+              </div>
+              <span id="contadorOcupantesViatura" class="contador-ocupantes">0 pessoas</span>
+            </div>
+
+            <div class="subtitulo-inclusao-viatura">Adicionar pessoa cadastrada</div>
+
+            <div class="campo campo-sem-margem">
+              <label>RG/CPF da pessoa</label>
+              <div class="linha-busca">
+                <input type="text" id="rgCpfBuscaOcupante" placeholder="Digite ao menos 3 dígitos">
+                <button type="button" onclick="buscarOcupanteViatura()">Buscar</button>
+              </div>
+            </div>
+
+            <div id="resultadoOcupanteViatura" class="resultado oculto"></div>
+
+            <div class="opcao-militar-externo">
+              <button type="button" onclick="alternarFormularioOcupanteExterno()">
+                + Adicionar pessoa não cadastrada
+              </button>
+            </div>
+
+            <div id="areaOcupanteExterno" class="dados-militar-externo oculto">
+              <strong>Identificação manual do ocupante</strong>
+              <div class="campo">
+                <label>Posto/graduação e nome</label>
+                <input type="text" id="nomeOcupanteExterno" placeholder="Ex.: CB COSTA">
+              </div>
+              <div class="campo">
+                <label>RG/CPF ou identidade funcional</label>
+                <input type="text" id="rgOcupanteExterno" placeholder="Documento do militar">
+              </div>
+              <button type="button" class="botao-adicionar-externo" onclick="adicionarOcupanteExterno()">
+                Adicionar pessoa à viatura
+              </button>
+            </div>
+
+            <div id="listaOcupantesViatura" class="lista-ocupantes oculto"></div>
+            <div class="dica-varios-ocupantes">
+              Depois de adicionar uma pessoa, continue usando as opções acima até completar todos os ocupantes.
+            </div>
+          </div>
+
+          <div id="areaVisitante" class="oculto">
+            <div class="campo">
+              <label>Nome do visitante</label>
+              <input type="text" id="nomeVisitante" placeholder="Nome completo">
+            </div>
+
+            <div class="campo">
+              <label>RG/CPF do visitante</label>
+              <input type="text" id="rgCpfVisitante" placeholder="RG ou CPF">
+            </div>
+          </div>
+
+          <div class="campo">
+            <label>Destino</label>
+            <select id="destino"></select>
+          </div>
+
+          <div class="campo">
+            <label>Procedência</label>
+            <select id="procedencia" onchange="verificarComplementoProcedencia()"></select>
+          </div>
+
+          <div id="areaComplementoProcedencia" class="campo oculto">
+            <label id="labelComplementoProcedencia">Complemento da procedência</label>
+            <input type="text" id="complementoProcedencia" placeholder="Informe o complemento">
+          </div>
+
+          <div class="campo">
+            <label id="labelPrefixoPlaca">Prefixo/Placa</label>
+            <input type="text" id="prefixoPlaca" placeholder="Opcional" oninput="normalizarPrefixoPlaca(this)" autocomplete="off">
+          </div>
+
+          <div class="campo">
+            <label>Observações</label>
+            <textarea id="observacoes" placeholder="Opcional"></textarea>
+          </div>
+
+          <button type="button" id="btnRegistrarMovimentacao" class="botao-principal" onclick="registrarMovimentacao()">
+            Registrar
+          </button>
+
+          <div id="mensagemSistema" class="mensagem-sistema oculto"></div>
+        </section>
+      </main>
+    </div>
+
+    <div id="modalConfirmacao" class="modal-fundo oculto">
+      <div class="modal-card">
+        <h3 id="modalTitulo">Confirmar ação</h3>
+        <p id="modalTexto">Deseja continuar?</p>
+
+        <div class="modal-botoes">
+          <button type="button" class="modal-cancelar" onclick="fecharModalConfirmacao()">
+            Cancelar
+          </button>
+
+          <button type="button" class="modal-confirmar" id="btnModalConfirmar">
+            Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js?v=4.0.0"></script>
+  </body>
+</html>
