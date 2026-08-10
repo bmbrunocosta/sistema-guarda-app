@@ -1,0 +1,619 @@
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    background: #f3f4f6;
+    color: #111827;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  .app {
+    width: 100vw;
+    min-height: 100vh;
+    background: #f3f4f6;
+  }
+
+  .topo {
+    background: #111827;
+    color: white;
+    padding: 22px 18px 20px;
+    border-bottom-left-radius: 22px;
+    border-bottom-right-radius: 22px;
+  }
+
+  .topo h1 {
+    margin: 0;
+    font-size: 24px;
+    line-height: 1.2;
+  }
+
+  .topo p {
+    margin: 6px 0 0;
+    color: #d1d5db;
+    font-size: 15px;
+  }
+
+  .conteudo {
+    padding: 14px;
+    width: 100%;
+  }
+
+  .card {
+    width: 100%;
+    background: white;
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.10);
+  }
+
+  .card + .card {
+    margin-top: 14px;
+  }
+
+  .card h2 {
+    margin: 0 0 18px;
+    font-size: 21px;
+    line-height: 1.2;
+  }
+
+  .campo {
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 7px;
+    font-size: 15px;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    min-height: 48px;
+    padding: 13px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 13px;
+    font-size: 16px;
+    background: white;
+    color: #111827;
+    outline: none;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: #111827;
+    box-shadow: 0 0 0 2px rgba(17,24,39,0.12);
+  }
+
+  textarea {
+    min-height: 90px;
+    resize: vertical;
+  }
+
+  .botoes-segmentados {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .botoes-segmentados button {
+    min-height: 48px;
+    padding: 13px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 13px;
+    background: white;
+    color: #111827;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .botoes-segmentados button.ativo {
+    background: #111827;
+    color: white;
+    border-color: #111827;
+  }
+
+  .linha-busca {
+    display: grid;
+    grid-template-columns: 1fr 92px;
+    gap: 8px;
+  }
+
+  .linha-busca button {
+    min-height: 48px;
+    border: none;
+    border-radius: 13px;
+    background: #374151;
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .resultado {
+    margin-top: 8px;
+    padding: 13px;
+    border-radius: 13px;
+    background: #ecfdf5;
+    color: #065f46;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1.3;
+  }
+
+  .resultado.erro {
+    background: #fef2f2;
+    color: #991b1b;
+  }
+
+  .item-pessoa {
+    width: 100%;
+    display: block;
+    text-align: left;
+    padding: 12px;
+    margin-bottom: 8px;
+    border: 1px solid #bbf7d0;
+    border-radius: 10px;
+    background: white;
+    color: #065f46;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .item-pessoa:last-child {
+    margin-bottom: 0;
+  }
+
+  .pessoa-selecionada {
+    padding: 12px;
+    border-radius: 10px;
+    background: #dcfce7;
+    color: #065f46;
+    font-weight: 700;
+  }
+
+  .bloco-viatura {
+    margin-bottom: 16px;
+    padding: 14px;
+    border: 1px solid #bfdbfe;
+    border-radius: 15px;
+    background: #eff6ff;
+  }
+
+  .opcao-militar-externo {
+    margin-top: 10px;
+  }
+
+  .opcao-militar-externo button,
+  .botao-voltar-busca {
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 12px;
+    border: 1px dashed #2563eb;
+    border-radius: 11px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .dados-militar-externo {
+    margin-top: 10px;
+    padding: 13px;
+    border: 1px solid #fcd34d;
+    border-radius: 13px;
+    background: #fffbeb;
+  }
+
+  .dados-militar-externo > strong {
+    display: block;
+    margin-bottom: 12px;
+    color: #92400e;
+    font-size: 14px;
+  }
+
+  .dados-militar-externo .botao-voltar-busca {
+    margin-top: 12px;
+    border-color: #d97706;
+    background: white;
+    color: #92400e;
+  }
+
+  .botao-adicionar-externo {
+    width: 100%;
+    min-height: 44px;
+    padding: 11px 12px;
+    border: none;
+    border-radius: 11px;
+    background: #d97706;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .titulo-bloco-viatura {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .titulo-bloco-viatura strong,
+  .titulo-bloco-viatura span {
+    display: block;
+  }
+
+  .titulo-bloco-viatura strong {
+    color: #1e3a8a;
+    font-size: 16px;
+  }
+
+  .titulo-bloco-viatura div > span {
+    margin-top: 3px;
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .contador-ocupantes {
+    min-width: 30px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: #1d4ed8;
+    color: white;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .subtitulo-inclusao-viatura {
+    margin: 16px 0 8px;
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: #24344d;
+  }
+
+  .dica-varios-ocupantes {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #eef5ff;
+    color: #365273;
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+
+  .campo-sem-margem {
+    margin-bottom: 0;
+  }
+
+  .lista-ocupantes {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .ocupante-viatura {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 11px 12px;
+    border: 1px solid #bfdbfe;
+    border-radius: 11px;
+    background: white;
+  }
+
+  .ocupante-viatura strong,
+  .ocupante-viatura span {
+    display: block;
+  }
+
+  .ocupante-viatura small {
+    display: inline-block;
+    width: fit-content;
+    margin-top: 4px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #e7eef8;
+    color: #3c5575;
+    font-size: 0.68rem;
+    font-weight: 800;
+  }
+
+  .ocupante-viatura strong {
+    color: #1e3a8a;
+    font-size: 14px;
+  }
+
+  .ocupante-viatura span {
+    margin-top: 2px;
+    color: #64748b;
+    font-size: 12px;
+  }
+
+  .ocupante-viatura button {
+    flex: 0 0 auto;
+    min-height: 36px;
+    padding: 8px 10px;
+    border: 1px solid #fecaca;
+    border-radius: 9px;
+    background: #fef2f2;
+    color: #991b1b;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .mensagem-sistema {
+    margin-top: 12px;
+    padding: 13px;
+    border-radius: 13px;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1.3;
+    text-align: center;
+  }
+
+  .mensagem-sistema.sucesso {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #86efac;
+  }
+
+  .mensagem-sistema.erro {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+  }
+
+  .card-guarda {
+    margin-bottom: 14px;
+  }
+
+  .status-guarda {
+    padding: 13px;
+    border-radius: 13px;
+    background: #eff6ff;
+    color: #1e3a8a;
+    border: 1px solid #bfdbfe;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1.35;
+    margin-bottom: 14px;
+  }
+
+  .status-guarda.sem-guarda {
+    background: #fff7ed;
+    color: #9a3412;
+    border-color: #fed7aa;
+  }
+
+  .status-guarda.com-guarda {
+    background: #ecfdf5;
+    color: #065f46;
+    border-color: #86efac;
+  }
+
+  .botao-principal {
+    width: 100%;
+    min-height: 54px;
+    padding: 15px;
+    border: none;
+    border-radius: 15px;
+    background: #111827;
+    color: white;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+
+  .botao-secundario {
+    width: 100%;
+    min-height: 52px;
+    padding: 14px;
+    border: none;
+    border-radius: 14px;
+    background: #2563eb;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+
+  #btnEncerrarGuarda.botao-alerta {
+    width: 100%;
+    min-height: 38px;
+    padding: 8px;
+    border: none !important;
+    border-radius: 10px;
+    background: transparent !important;
+    color: #991b1b !important;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    text-decoration: underline;
+    box-shadow: none !important;
+  }
+
+  button:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+
+  .botao-principal:active,
+  .botao-secundario:active,
+  .botao-alerta:active,
+  .linha-busca button:active,
+  .botoes-segmentados button:active {
+    transform: scale(0.98);
+  }
+
+  .oculto {
+    display: none !important;
+  }
+
+  @media (min-width: 700px) {
+    body {
+      padding: 24px 0;
+    }
+
+    .app {
+      border-radius: 28px;
+      overflow: hidden;
+      min-height: auto;
+      box-shadow: 0 18px 45px rgba(0,0,0,0.18);
+      max-width: 430px;
+    }
+  }
+
+  .cabecalho-card-guarda {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.cabecalho-card-guarda h2 {
+  margin: 0;
+}
+
+.botao-sair {
+  min-height: 34px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #991b1b;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.botao-sair:active {
+  transform: scale(0.97);
+}
+
+.modal-fundo {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 99999;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 390px;
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 18px 45px rgba(0,0,0,0.28);
+}
+
+.modal-card h3 {
+  margin: 0 0 10px;
+  font-size: 20px;
+  color: #111827;
+}
+
+.modal-card p {
+  margin: 0;
+  color: #374151;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.modal-botoes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.modal-cancelar,
+.modal-confirmar {
+  min-height: 46px;
+  border: none;
+  border-radius: 13px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modal-cancelar {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.modal-confirmar {
+  background: #111827;
+  color: white;
+}
+
+.modal-confirmar.perigo {
+  background: #991b1b;
+}
+
+.acoes-guarda {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.botao-trocar,
+.botao-sair {
+  min-height: 34px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 999px;
+  background: #f3f4f6;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.botao-trocar {
+  color: #1e40af;
+}
+
+.botao-sair {
+  color: #991b1b;
+}
+
+.aviso-bloqueio {
+  background: #fff7ed;
+  color: #9a3412;
+  border: 1px solid #fed7aa;
+  border-radius: 16px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+  margin-bottom: 14px;
+}
