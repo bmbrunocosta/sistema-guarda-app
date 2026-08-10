@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#111827">
     <title>Controle de Acesso - Guarda</title>
-    <link rel="stylesheet" href="style.css?v=6.0.0">
+    <link rel="stylesheet" href="style.css?v=7.0.0">
   </head>
 
   <body>
@@ -158,12 +158,33 @@
               <span>Pessoas dentro</span>
             </div>
             <div class="indicador-painel">
+              <strong id="totalViaturasDisponiveis">0</strong>
+              <span>Viaturas disponíveis</span>
+            </div>
+            <div class="indicador-painel indicador-alerta">
+              <strong id="totalViaturasEmOcorrencia">0</strong>
+              <span>Viaturas em SOS</span>
+            </div>
+            <div class="indicador-painel">
               <strong id="totalViaturasDentro">0</strong>
-              <span>Viaturas dentro</span>
+              <span>Viaturas externas</span>
             </div>
             <div class="indicador-painel">
               <strong id="totalMovimentacoesCiclo">0</strong>
               <span>Movimentações</span>
+            </div>
+          </div>
+
+          <div class="secao-painel-comandante">
+            <h3>Viaturas do quartel</h3>
+            <div id="listaViaturasQuartel" class="lista-painel"></div>
+            <div class="cadastro-viatura-painel">
+              <strong>Cadastrar viatura</strong>
+              <div class="grade-cadastro-viatura">
+                <input type="text" id="prefixoNovaViatura" placeholder="Prefixo" oninput="normalizarPrefixoPlaca(this)">
+                <input type="text" id="descricaoNovaViatura" placeholder="Tipo/modelo (opcional)">
+                <button type="button" id="btnCadastrarViatura" onclick="cadastrarViaturaQuartel()">Cadastrar</button>
+              </div>
             </div>
           </div>
 
@@ -193,19 +214,22 @@
 
           <div class="campo">
             <label>Forma do registro</label>
-            <div class="botoes-segmentados">
+            <div class="botoes-segmentados" id="botoesModoRegistro">
               <button type="button" class="ativo" id="btnModoIndividual" onclick="selecionarModoRegistro('Individual')">Individual</button>
               <button type="button" id="btnModoViatura" onclick="selecionarModoRegistro('Viatura')">Viatura</button>
+              <button type="button" id="btnModoSOS" onclick="selecionarModoRegistro('SOS')">SOS</button>
             </div>
           </div>
 
           <div class="campo">
-            <label>Tipo de movimentação</label>
+            <label id="labelTipoMovimentacao">Tipo de movimentação</label>
             <div class="botoes-segmentados">
-              <button type="button" class="ativo" id="btnEntrada" onclick="selecionarMovimentacao('Entrada')">Entrada</button>
-              <button type="button" id="btnSaida" onclick="selecionarMovimentacao('Saída')">Saída</button>
+              <button type="button" class="ativo" id="btnEntrada" onclick="selecionarMovimentacao('Entrada')"><span id="textoBtnEntrada">Entrada</span></button>
+              <button type="button" id="btnSaida" onclick="selecionarMovimentacao('Saída')"><span id="textoBtnSaida">Saída</span></button>
             </div>
           </div>
+
+          <div id="areaRegistroPadrao">
 
           <div class="campo" id="campoTipoRegistro">
             <label>Tipo de registro</label>
@@ -332,6 +356,22 @@
             <label>Observações</label>
             <textarea id="observacoes" placeholder="Opcional"></textarea>
           </div>
+          </div>
+
+          <div id="areaRegistroSOS" class="bloco-sos oculto">
+            <div class="titulo-bloco-viatura">
+              <div>
+                <strong id="tituloSelecaoSOS">Selecionar viaturas para saída</strong>
+                <span>É possível registrar várias viaturas no mesmo acionamento.</span>
+              </div>
+            </div>
+            <div id="listaViaturasSOS" class="lista-selecao-sos"></div>
+            <div id="configuracoesViaturasSOS" class="configuracoes-sos"></div>
+            <div class="campo campo-sem-margem">
+              <label>Observações do SOS</label>
+              <textarea id="observacoesSOS" placeholder="Ocorrência, endereço ou informação opcional"></textarea>
+            </div>
+          </div>
 
           <button type="button" id="btnRegistrarMovimentacao" class="botao-principal" onclick="registrarMovimentacao()">
             Registrar
@@ -359,6 +399,6 @@
       </div>
     </div>
 
-    <script src="script.js?v=6.0.0"></script>
+    <script src="script.js?v=7.0.0"></script>
   </body>
 </html>
