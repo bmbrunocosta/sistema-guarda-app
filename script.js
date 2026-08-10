@@ -55,6 +55,8 @@ function montarDadosChamadaApi(nome, argumentos) {
       return { sessaoToken: sessaoToken };
     case 'getComandanteAtivo':
       return { sessaoToken: sessaoComandanteToken };
+    case 'getPainelComandante':
+      return { sessaoToken: sessaoComandanteToken };
     case 'buscarPessoasPorRgCpf':
       return { rgCpf: argumentos[0], sessaoToken: sessaoToken };
     case 'registrarMovimentacao':
@@ -155,6 +157,7 @@ function criarExecutorAppsScript() {
     'getListasFormulario',
     'getGuardaAtivo',
     'getComandanteAtivo',
+    'getPainelComandante',
     'buscarPessoasPorRgCpf',
     'registrarMovimentacao',
     'enviarCodigoAssumirGuarda',
@@ -199,6 +202,7 @@ Object.defineProperty(window.google.script, 'run', {
   let dadosCodigoComandante = null;
   let comandanteAtual = null;
   let emailEncerramentoComandante = null;
+  let painelComandanteCarregado = false;
 
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -210,6 +214,12 @@ Object.defineProperty(window.google.script, 'run', {
     restaurarCodigoGuardaPendente();
     restaurarCodigoComandantePendente();
     aplicarCodigoDoLink();
+
+    setInterval(() => {
+      if (aparelhoAssumiuComandanteAtual()) {
+        carregarPainelComandante(true);
+      }
+    }, 60000);
   });
 
   function selecionarMovimentacao(tipo) {
@@ -713,6 +723,10 @@ Object.defineProperty(window.google.script, 'run', {
         mostrarMensagem(resposta.mensagem || 'Movimentação registrada com sucesso.', 'sucesso');
         limparFormulario();
 
+        if (aparelhoAssumiuComandanteAtual()) {
+          carregarPainelComandante(true);
+        }
+
         botao.disabled = false;
         botao.textContent = modoRegistroAtual === 'Viatura' ? 'Registrar viatura' : 'Registrar';
       })
@@ -1173,6 +1187,165 @@ function atualizarTelaComandante() {
     btnTrocar.classList.add('oculto');
     limparComandanteLocal();
   }
+
+  atualizarVisibilidadePainelComandante();
+}
+
+function atualizarVisibilidadePainelComandante() {
+  const painel = document.getElementById('cardPainelComandante');
+
+  if (!painel) return;
+
+  if (aparelhoAssumiuComandanteAtual()) {
+    painel.classList.remove('oculto');
+
+    if (!painelComandanteCarregado) {
+      carregarPainelComandante(true);
+    }
+  } else {
+    painel.classList.add('oculto');
+    painelComandanteCarregado = false;
+  }
+}
+
+function carregarPainelComandante(silencioso = false) {
+  if (!aparelhoAssumiuComandanteAtual()) {
+    atualizarVisibilidadePainelComandante();
+    return;
+  }
+
+  const botao = document.getElementById('btnAtualizarPainelComandante');
+
+  if (botao) {
+    botao.disabled = true;
+    botao.textContent = 'Atualizando...';
+  }
+
+  google.script.run
+    .withSuccessHandler((painel) => {
+      renderizarPainelComandante(painel || {});
+      painelComandanteCarregado = true;
+
+      if (botao) {
+        botao.disabled = false;
+        botao.textContent = 'Atualizar';
+      }
+    })
+    .withFailureHandler((erro) => {
+      if (!silencioso) {
+        mostrarMensagem('Erro ao atualizar painel: ' + erro.message, 'erro');
+      }
+
+      if (botao) {
+        botao.disabled = false;
+        botao.textContent = 'Atualizar';
+      }
+    })
+    .getPainelComandante();
+}
+
+function renderizarPainelComandante(painel) {
+  const totais = painel.totais || {};
+
+  document.getElementById('totalPessoasDentro').textContent = totais.pessoasDentro || 0;
+  document.getElementById('totalViaturasDentro').textContent = totais.viaturasDentro || 0;
+  document.getElementById('totalMovimentacoesCiclo').textContent = totais.movimentacoesCiclo || 0;
+  document.getElementById('cicloPainelComandante').textContent =
+    painel.cicloInicio && painel.cicloFim
+      ? `${painel.cicloInicio} até ${painel.cicloFim}`
+      : 'Ciclo das 08h às 08h';
+  document.getElementById('atualizadoEmPainelComandante').textContent =
+    painel.atualizadoEm ? 'Atualizado em ' + painel.atualizadoEm : '';
+
+  renderizarListaPessoasDentro(painel.dentro || []);
+  renderizarListaMovimentacoesRecentes(painel.recentes || []);
+}
+
+function renderizarListaPessoasDentro(pessoas) {
+  const lista = document.getElementById('listaPessoasDentro');
+  lista.innerHTML = '';
+
+  if (!pessoas.length) {
+    lista.appendChild(criarEstadoVazioPainel('Nenhuma pessoa registrada dentro do quartel.'));
+    return;
+  }
+
+  pessoas.forEach(pessoa => {
+    const item = document.createElement('div');
+    item.className = 'item-painel item-dentro';
+
+    const cabecalho = document.createElement('div');
+    cabecalho.className = 'cabecalho-item-painel';
+
+    const nome = document.createElement('strong');
+    nome.textContent = pessoa.nome || 'Pessoa não identificada';
+
+    const horario = document.createElement('span');
+    horario.textContent = pessoa.dataHora || '';
+
+    cabecalho.appendChild(nome);
+    cabecalho.appendChild(horario);
+    item.appendChild(cabecalho);
+    item.appendChild(criarDetalhesPessoaPainel(pessoa));
+    lista.appendChild(item);
+  });
+}
+
+function renderizarListaMovimentacoesRecentes(movimentacoes) {
+  const lista = document.getElementById('listaMovimentacoesRecentes');
+  lista.innerHTML = '';
+
+  if (!movimentacoes.length) {
+    lista.appendChild(criarEstadoVazioPainel('Nenhuma movimentação registrada neste ciclo.'));
+    return;
+  }
+
+  movimentacoes.forEach(movimentacao => {
+    const item = document.createElement('div');
+    const tipo = movimentacao.tipoMovimentacao === 'Saída' ? 'saida' : 'entrada';
+    item.className = 'item-painel movimentacao-' + tipo;
+
+    const cabecalho = document.createElement('div');
+    cabecalho.className = 'cabecalho-item-painel';
+
+    const nome = document.createElement('strong');
+    nome.textContent = movimentacao.nome || 'Pessoa não identificada';
+
+    const tipoHorario = document.createElement('span');
+    tipoHorario.textContent = (movimentacao.tipoMovimentacao || '') + ' • ' + (movimentacao.dataHora || '');
+
+    cabecalho.appendChild(nome);
+    cabecalho.appendChild(tipoHorario);
+    item.appendChild(cabecalho);
+    item.appendChild(criarDetalhesPessoaPainel(movimentacao));
+    lista.appendChild(item);
+  });
+}
+
+function criarDetalhesPessoaPainel(pessoa) {
+  const detalhes = document.createElement('div');
+  detalhes.className = 'detalhes-item-painel';
+  const partes = [];
+
+  if (pessoa.documento) partes.push('Doc.: ' + pessoa.documento);
+  if (pessoa.tipoPessoa) partes.push(pessoa.tipoPessoa);
+  if (pessoa.destino) partes.push('Destino: ' + pessoa.destino);
+  if (pessoa.prefixoPlaca) {
+    partes.push(
+      (pessoa.funcaoViatura ? pessoa.funcaoViatura + ' • ' : '') +
+      'Viatura ' + pessoa.prefixoPlaca
+    );
+  }
+
+  detalhes.textContent = partes.join(' • ') || 'Sem detalhes adicionais';
+  return detalhes;
+}
+
+function criarEstadoVazioPainel(texto) {
+  const vazio = document.createElement('div');
+  vazio.className = 'estado-vazio-painel';
+  vazio.textContent = texto;
+  return vazio;
 }
 
 function mostrarAreaTrocaComandante() {
