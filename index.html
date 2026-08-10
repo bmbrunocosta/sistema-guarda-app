@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#111827">
     <title>Controle de Acesso - Guarda</title>
-    <link rel="stylesheet" href="style.css?v=5.0.0">
+    <link rel="stylesheet" href="style.css?v=6.0.0">
   </head>
 
   <body>
@@ -139,6 +139,49 @@
               Assumir como comandante
             </button>
           </div>
+        </section>
+
+        <section class="card painel-comandante oculto" id="cardPainelComandante">
+          <div class="cabecalho-painel-comandante">
+            <div>
+              <h2>Painel do Comandante</h2>
+              <span id="cicloPainelComandante">Ciclo das 08h às 08h</span>
+            </div>
+            <button type="button" id="btnAtualizarPainelComandante" onclick="carregarPainelComandante()">
+              Atualizar
+            </button>
+          </div>
+
+          <div class="resumo-painel-comandante">
+            <div class="indicador-painel">
+              <strong id="totalPessoasDentro">0</strong>
+              <span>Pessoas dentro</span>
+            </div>
+            <div class="indicador-painel">
+              <strong id="totalViaturasDentro">0</strong>
+              <span>Viaturas dentro</span>
+            </div>
+            <div class="indicador-painel">
+              <strong id="totalMovimentacoesCiclo">0</strong>
+              <span>Movimentações</span>
+            </div>
+          </div>
+
+          <div class="secao-painel-comandante">
+            <h3>Dentro do quartel</h3>
+            <div id="listaPessoasDentro" class="lista-painel">
+              <div class="estado-vazio-painel">Carregando...</div>
+            </div>
+          </div>
+
+          <div class="secao-painel-comandante">
+            <h3>Movimentações recentes</h3>
+            <div id="listaMovimentacoesRecentes" class="lista-painel">
+              <div class="estado-vazio-painel">Carregando...</div>
+            </div>
+          </div>
+
+          <div id="atualizadoEmPainelComandante" class="rodape-painel-comandante"></div>
         </section>
 
         <div id="avisoSemPermissaoLancamento" class="aviso-bloqueio oculto">
@@ -316,6 +359,6 @@
       </div>
     </div>
 
-    <script src="script.js?v=5.0.1"></script>
+    <script src="script.js?v=6.0.0"></script>
   </body>
 </html>
