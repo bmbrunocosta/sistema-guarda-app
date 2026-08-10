@@ -76,24 +76,54 @@
 
 .cabecalho-pessoas-dentro-guarda {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 14px;
 }
 
-.cabecalho-pessoas-dentro-guarda h2 {
-  margin: 0 0 4px;
+.botao-alternar-pessoas-dentro {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #1e293b;
+  text-align: left;
+  cursor: pointer;
 }
 
-.cabecalho-pessoas-dentro-guarda p {
-  margin: 0;
+.titulo-pessoas-dentro {
+  display: block;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.resumo-pessoas-dentro {
+  display: block;
+  margin-top: 4px;
   color: #64748b;
   font-size: 12px;
   line-height: 1.35;
 }
 
-.cabecalho-pessoas-dentro-guarda button {
+.icone-alternar-pessoas-dentro {
+  flex: 0 0 auto;
+  font-size: 22px;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.card-pessoas-dentro-guarda.recolhido .icone-alternar-pessoas-dentro {
+  transform: rotate(180deg);
+}
+
+#btnAtualizarPessoasDentroGuarda {
   flex: 0 0 auto;
   min-height: 36px;
   padding: 8px 11px;
@@ -104,6 +134,13 @@
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
+}
+
+.descricao-pessoas-dentro-guarda {
+  margin: 0 0 12px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .item-pessoa-dentro-guarda {
