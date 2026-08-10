@@ -27,36 +27,47 @@
   .topo {
     background: #111827;
     color: white;
-    padding: 22px 18px 20px;
+    padding: 14px 18px;
     border-bottom-left-radius: 22px;
     border-bottom-right-radius: 22px;
-    text-align: center;
+  }
+
+  .topo-identidade {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
   }
 
   .topo-brasao {
-    margin-bottom: 10px;
+    flex: 0 0 auto;
   }
 
   .topo-brasao img {
-    display: inline-block;
-    width: 82px;
-    height: 82px;
+    display: block;
+    width: 56px;
+    height: 56px;
     padding: 2px;
     border-radius: 50%;
     background: white;
     object-fit: contain;
   }
 
+  .topo-textos {
+    min-width: 0;
+    text-align: left;
+  }
+
   .topo h1 {
     margin: 0;
-    font-size: 24px;
+    font-size: 20px;
     line-height: 1.2;
   }
 
   .topo p {
-    margin: 6px 0 0;
+    margin: 4px 0 0;
     color: #d1d5db;
-    font-size: 15px;
+    font-size: 13px;
   }
 
   .conteudo {
@@ -1006,3 +1017,4 @@
   line-height: 1.35;
   margin-bottom: 14px;
 }
+
