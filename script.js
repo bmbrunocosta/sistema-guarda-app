@@ -3,6 +3,7 @@ const parametrosUrl = new URLSearchParams(window.location.search);
 
 window.PARAM_EMAIL_GUARDA = parametrosUrl.get('email') || '';
 window.PARAM_CODIGO_GUARDA = parametrosUrl.get('codigo') || '';
+window.PARAM_PERFIL = parametrosUrl.get('perfil') || '';
 
 async function chamarApi(acao, dados = {}) {
   let resposta;
@@ -19,17 +20,17 @@ async function chamarApi(acao, dados = {}) {
       })
     });
   } catch (erro) {
-    throw new Error('Não foi possível conectar ao servidor. Verifique a internet e tente novamente.');
+    throw new Error('NÃ£o foi possÃ­vel conectar ao servidor. Verifique a internet e tente novamente.');
   }
 
   if (!resposta.ok) {
-    throw new Error('Falha de comunicação com o servidor.');
+    throw new Error('Falha de comunicaÃ§Ã£o com o servidor.');
   }
 
   const resultado = await resposta.json();
 
   if (!resultado.sucesso) {
-    throw new Error(resultado.mensagem || 'Erro ao executar a ação.');
+    throw new Error(resultado.mensagem || 'Erro ao executar a aÃ§Ã£o.');
   }
 
   return resultado.resposta;
@@ -39,14 +40,21 @@ function obterSessaoTokenLocal() {
   return localStorage.getItem('guarda_sessao_token') || '';
 }
 
+function obterSessaoTokenComandanteLocal() {
+  return localStorage.getItem('comandante_sessao_token') || '';
+}
+
 function montarDadosChamadaApi(nome, argumentos) {
   const sessaoToken = obterSessaoTokenLocal();
+  const sessaoComandanteToken = obterSessaoTokenComandanteLocal();
 
   switch (nome) {
     case 'getListasFormulario':
       return {};
     case 'getGuardaAtivo':
       return { sessaoToken: sessaoToken };
+    case 'getComandanteAtivo':
+      return { sessaoToken: sessaoComandanteToken };
     case 'buscarPessoasPorRgCpf':
       return { rgCpf: argumentos[0], sessaoToken: sessaoToken };
     case 'registrarMovimentacao':
@@ -65,6 +73,20 @@ function montarDadosChamadaApi(nome, argumentos) {
         codigo: argumentos[1],
         sessaoToken: sessaoToken
       };
+    case 'enviarCodigoAssumirComandante':
+      return { email: argumentos[0] };
+    case 'validarCodigoAssumirComandante':
+      return { email: argumentos[0], codigo: argumentos[1] };
+    case 'assumirComandanteComEmailValidado':
+      return argumentos[0] || {};
+    case 'enviarCodigoEncerrarComandante':
+      return { sessaoToken: sessaoComandanteToken };
+    case 'validarCodigoEEncerrarComandante':
+      return {
+        email: argumentos[0],
+        codigo: argumentos[1],
+        sessaoToken: sessaoComandanteToken
+      };
     default:
       return argumentos[0] || {};
   }
@@ -81,6 +103,16 @@ function ajustarRespostaApi(nome, resposta) {
     return guarda;
   }
 
+  if (nome === 'getComandanteAtivo') {
+    const comandante = resposta && resposta.comandante ? resposta.comandante : null;
+
+    if (comandante) {
+      comandante.Sessao_Valida = resposta.sessaoValida === true;
+    }
+
+    return comandante;
+  }
+
   if (
     nome === 'assumirGuardaComEmailValidado' &&
     resposta &&
@@ -89,6 +121,16 @@ function ajustarRespostaApi(nome, resposta) {
   ) {
     resposta.guarda.Sessao_Valida = true;
     resposta.guarda.Sessao_Token = resposta.sessaoToken;
+  }
+
+  if (
+    nome === 'assumirComandanteComEmailValidado' &&
+    resposta &&
+    resposta.comandante &&
+    resposta.sessaoToken
+  ) {
+    resposta.comandante.Sessao_Valida = true;
+    resposta.comandante.Sessao_Token = resposta.sessaoToken;
   }
 
   return resposta;
@@ -112,13 +154,19 @@ function criarExecutorAppsScript() {
   [
     'getListasFormulario',
     'getGuardaAtivo',
+    'getComandanteAtivo',
     'buscarPessoasPorRgCpf',
     'registrarMovimentacao',
     'enviarCodigoAssumirGuarda',
     'validarCodigoAssumirGuarda',
     'assumirGuardaComEmailValidado',
     'enviarCodigoEncerrarGuarda',
-    'validarCodigoEEncerrarGuarda'
+    'validarCodigoEEncerrarGuarda',
+    'enviarCodigoAssumirComandante',
+    'validarCodigoAssumirComandante',
+    'assumirComandanteComEmailValidado',
+    'enviarCodigoEncerrarComandante',
+    'validarCodigoEEncerrarComandante'
   ].forEach(nome => {
     executor[nome] = (...argumentos) => {
       chamarApi(nome, montarDadosChamadaApi(nome, argumentos))
@@ -148,6 +196,9 @@ Object.defineProperty(window.google.script, 'run', {
   let dadosCodigoGuarda = null;
   let guardaAtual = null;
   let emailEncerramentoGuarda = null;
+  let dadosCodigoComandante = null;
+  let comandanteAtual = null;
+  let emailEncerramentoComandante = null;
 
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -155,7 +206,9 @@ Object.defineProperty(window.google.script, 'run', {
     selecionarModoRegistro('Individual');
     alternarTipoRegistro();
     carregarGuardaAtivo();
+    carregarComandanteAtivo();
     restaurarCodigoGuardaPendente();
+    restaurarCodigoComandantePendente();
     aplicarCodigoDoLink();
   });
 
@@ -163,7 +216,7 @@ Object.defineProperty(window.google.script, 'run', {
     tipoMovimentacaoAtual = tipo;
 
     document.getElementById('btnEntrada').classList.toggle('ativo', tipo === 'Entrada');
-    document.getElementById('btnSaida').classList.toggle('ativo', tipo === 'Saída');
+    document.getElementById('btnSaida').classList.toggle('ativo', tipo === 'SaÃ­da');
 
     preencherDestinos();
     preencherProcedencias();
@@ -204,7 +257,7 @@ Object.defineProperty(window.google.script, 'run', {
       ? 'Prefixo/Placa da viatura *'
       : 'Prefixo/Placa';
     document.getElementById('prefixoPlaca').placeholder = isViatura
-      ? 'Obrigatório'
+      ? 'ObrigatÃ³rio'
       : 'Opcional';
     document.getElementById('btnRegistrarMovimentacao').textContent = isViatura
       ? 'Registrar viatura'
@@ -293,8 +346,8 @@ Object.defineProperty(window.google.script, 'run', {
 
     lista.forEach(item => {
       const option = document.createElement('option');
-      option.value = item.Procedência;
-      option.textContent = item.Procedência;
+      option.value = item.ProcedÃªncia;
+      option.textContent = item.ProcedÃªncia;
       option.dataset.exigeComplemento = item.Exige_Complemento;
       select.appendChild(option);
     });
@@ -319,7 +372,7 @@ Object.defineProperty(window.google.script, 'run', {
     } else if (valor === 'Outra OBM') {
       label.textContent = 'Qual OBM?';
     } else {
-      label.textContent = 'Complemento da procedência';
+      label.textContent = 'Complemento da procedÃªncia';
     }
   }
 
@@ -327,7 +380,7 @@ Object.defineProperty(window.google.script, 'run', {
     const rgCpf = document.getElementById('rgCpfBusca').value.trim();
 
     if (!rgCpf || rgCpf.replace(/\D/g, '').length < 3) {
-      mostrarMensagem('Digite pelo menos 3 dígitos do RG/CPF.', 'erro');
+      mostrarMensagem('Digite pelo menos 3 dÃ­gitos do RG/CPF.', 'erro');
       return;
     }
 
@@ -355,7 +408,7 @@ Object.defineProperty(window.google.script, 'run', {
           const item = document.createElement('button');
           item.type = 'button';
           item.className = 'item-pessoa';
-          item.textContent = `${pessoa.Nome} — ${pessoa.RG_CPF}`;
+          item.textContent = `${pessoa.Nome} â€” ${pessoa.RG_CPF}`;
           item.onclick = () => selecionarPessoaEncontrada(pessoa);
 
           resultado.appendChild(item);
@@ -372,7 +425,7 @@ Object.defineProperty(window.google.script, 'run', {
       modoRegistroAtual === 'Viatura' &&
       ocupantesViatura.some(item => item.chaveLista === criarChaveParticipanteViatura(pessoa))
     ) {
-      mostrarMensagem('Este militar já foi adicionado como ocupante.', 'erro');
+      mostrarMensagem('Este militar jÃ¡ foi adicionado como ocupante.', 'erro');
       return;
     }
 
@@ -389,7 +442,7 @@ Object.defineProperty(window.google.script, 'run', {
     resultado.classList.remove('erro');
     resultado.innerHTML = `
       <div class="pessoa-selecionada">
-        Selecionado: ${pessoa.Nome} — ${pessoa.RG_CPF}
+        Selecionado: ${pessoa.Nome} â€” ${pessoa.RG_CPF}
       </div>
     `;
   }
@@ -414,7 +467,7 @@ Object.defineProperty(window.google.script, 'run', {
     const rgCpf = document.getElementById('rgCpfBuscaOcupante').value.trim();
 
     if (!rgCpf || rgCpf.replace(/\D/g, '').length < 3) {
-      mostrarMensagem('Digite pelo menos 3 dígitos do RG/CPF do ocupante.', 'erro');
+      mostrarMensagem('Digite pelo menos 3 dÃ­gitos do RG/CPF do ocupante.', 'erro');
       return;
     }
 
@@ -438,7 +491,7 @@ Object.defineProperty(window.google.script, 'run', {
           const item = document.createElement('button');
           item.type = 'button';
           item.className = 'item-pessoa';
-          item.textContent = `${pessoa.Nome} — ${pessoa.RG_CPF}`;
+          item.textContent = `${pessoa.Nome} â€” ${pessoa.RG_CPF}`;
           item.onclick = () => adicionarOcupanteViatura(pessoa);
           resultado.appendChild(item);
         });
@@ -456,12 +509,12 @@ Object.defineProperty(window.google.script, 'run', {
     });
 
     if (pessoaSelecionada && criarChaveParticipanteViatura(pessoaSelecionada) === participante.chaveLista) {
-      mostrarMensagem('O condutor não pode ser adicionado também como ocupante.', 'erro');
+      mostrarMensagem('O condutor nÃ£o pode ser adicionado tambÃ©m como ocupante.', 'erro');
       return;
     }
 
     if (ocupantesViatura.some(item => item.chaveLista === participante.chaveLista)) {
-      mostrarMensagem('Este militar já está na lista de ocupantes.', 'erro');
+      mostrarMensagem('Este militar jÃ¡ estÃ¡ na lista de ocupantes.', 'erro');
       return;
     }
 
@@ -507,12 +560,12 @@ Object.defineProperty(window.google.script, 'run', {
         });
 
     if (chaveCondutor && chaveCondutor === participante.chaveLista) {
-      mostrarMensagem('O condutor não pode ser adicionado também como ocupante.', 'erro');
+      mostrarMensagem('O condutor nÃ£o pode ser adicionado tambÃ©m como ocupante.', 'erro');
       return;
     }
 
     if (ocupantesViatura.some(item => item.chaveLista === participante.chaveLista)) {
-      mostrarMensagem('Este militar já está na lista de ocupantes.', 'erro');
+      mostrarMensagem('Este militar jÃ¡ estÃ¡ na lista de ocupantes.', 'erro');
       return;
     }
 
@@ -542,357 +595,8 @@ Object.defineProperty(window.google.script, 'run', {
     renderizarOcupantesViatura();
   }
 
-  function renderizarOcupantesViatura() {
-    const lista = document.getElementById('listaOcupantesViatura');
-    const contador = document.getElementById('contadorOcupantesViatura');
-
-    const quantidade = ocupantesViatura.length;
-    contador.textContent = quantidade === 1 ? '1 pessoa' : `${quantidade} pessoas`;
-    lista.innerHTML = '';
-    lista.classList.toggle('oculto', ocupantesViatura.length === 0);
-
-    ocupantesViatura.forEach(pessoa => {
-      const item = document.createElement('div');
-      item.className = 'ocupante-viatura';
-
-      const identificacao = document.createElement('div');
-      const nome = document.createElement('strong');
-      const documento = document.createElement('span');
-      const origem = document.createElement('small');
-      nome.textContent = pessoa.Nome;
-      documento.textContent = pessoa.RG_CPF;
-      origem.textContent = String(pessoa.origem || '').toLowerCase() === 'manual'
-        ? 'Não cadastrado'
-        : 'Cadastrado';
-      identificacao.appendChild(nome);
-      identificacao.appendChild(documento);
-      identificacao.appendChild(origem);
-      item.appendChild(identificacao);
-
-      const remover = document.createElement('button');
-      remover.type = 'button';
-      remover.textContent = 'Remover';
-      remover.onclick = () => removerOcupanteViatura(pessoa.chaveLista);
-      item.appendChild(remover);
-      lista.appendChild(item);
-    });
-  }
-
-  function registrarMovimentacao() {
-    const tipoRegistro = document.getElementById('tipoRegistro').value;
-
-    const dados = {
-      modoRegistro: modoRegistroAtual,
-      tipoMovimentacao: tipoMovimentacaoAtual,
-      tipoRegistro: tipoRegistro,
-      pessoaCadastrada: pessoaSelecionada,
-      condutorExterno: condutorExternoAtivo ? {
-        origem: 'Manual',
-        Nome: document.getElementById('nomeCondutorExterno').value.trim(),
-        RG_CPF: document.getElementById('rgCondutorExterno').value.trim()
-      } : null,
-      nomeVisitante: document.getElementById('nomeVisitante').value.trim(),
-      rgCpfVisitante: document.getElementById('rgCpfVisitante').value.trim(),
-      destino: document.getElementById('destino').value,
-      procedencia: document.getElementById('procedencia').value,
-      complementoProcedencia: document.getElementById('complementoProcedencia').value.trim(),
-      prefixoPlaca: document.getElementById('prefixoPlaca').value.replace(/\s+/g, '').toUpperCase(),
-      observacoes: document.getElementById('observacoes').value.trim(),
-      ocupantesViatura: ocupantesViatura
-    };
-
-    if (modoRegistroAtual === 'Viatura') {
-      if (!pessoaSelecionada && !condutorExternoAtivo) {
-        mostrarMensagem('Selecione um condutor cadastrado ou informe um condutor externo.', 'erro');
-        return;
-      }
-
-      if (
-        condutorExternoAtivo &&
-        (!dados.condutorExterno.Nome || !dados.condutorExterno.RG_CPF)
-      ) {
-        mostrarMensagem('Informe o nome e o documento do condutor externo.', 'erro');
-        return;
-      }
-
-      if (!dados.prefixoPlaca) {
-        mostrarMensagem('Informe o prefixo ou a placa da viatura.', 'erro');
-        return;
-      }
-
-      if (ocupantesViatura.length === 0) {
-        mostrarMensagem('Adicione ao menos um ocupante da viatura.', 'erro');
-        return;
-      }
-    }
-
-    if (tipoRegistro === 'Pessoa cadastrada' && !pessoaSelecionada) {
-      mostrarMensagem('Busque e selecione uma pessoa cadastrada antes de registrar.', 'erro');
-      return;
-    }
-
-    if (tipoRegistro === 'Visitante eventual') {
-      if (!dados.nomeVisitante) {
-        mostrarMensagem('Informe o nome do visitante.', 'erro');
-        return;
-      }
-
-      if (!dados.rgCpfVisitante) {
-        mostrarMensagem('Informe o RG/CPF do visitante.', 'erro');
-        return;
-      }
-    }
-
-    const areaComplemento = document.getElementById('areaComplementoProcedencia');
-    const complementoVisivel = !areaComplemento.classList.contains('oculto');
-
-    if (complementoVisivel && !dados.complementoProcedencia) {
-      mostrarMensagem('Informe o complemento da procedência.', 'erro');
-      return;
-    }
-
-    const botao = document.getElementById('btnRegistrarMovimentacao');
-    botao.disabled = true;
-    botao.textContent = 'Registrando...';
-
-    google.script.run
-      .withSuccessHandler((resposta) => {
-        mostrarMensagem(resposta.mensagem || 'Movimentação registrada com sucesso.', 'sucesso');
-        limparFormulario();
-
-        botao.disabled = false;
-        botao.textContent = modoRegistroAtual === 'Viatura' ? 'Registrar viatura' : 'Registrar';
-      })
-      .withFailureHandler((erro) => {
-        mostrarMensagem('Erro ao registrar movimentação: ' + erro.message, 'erro');
-
-        botao.disabled = false;
-        botao.textContent = modoRegistroAtual === 'Viatura' ? 'Registrar viatura' : 'Registrar';
-      })
-      .registrarMovimentacao(dados);
-  }
-
-  function limparFormulario() {
-    pessoaSelecionada = null;
-    condutorExternoAtivo = false;
-    ocupantesViatura = [];
-
-    document.getElementById('rgCpfBusca').value = '';
-    document.getElementById('resultadoPessoa').innerHTML = '';
-    document.getElementById('resultadoPessoa').classList.add('oculto');
-
-    document.getElementById('nomeVisitante').value = '';
-    document.getElementById('rgCpfVisitante').value = '';
-
-    document.getElementById('complementoProcedencia').value = '';
-    document.getElementById('prefixoPlaca').value = '';
-    document.getElementById('observacoes').value = '';
-    document.getElementById('rgCpfBuscaOcupante').value = '';
-    document.getElementById('resultadoOcupanteViatura').innerHTML = '';
-    document.getElementById('resultadoOcupanteViatura').classList.add('oculto');
-    document.getElementById('nomeCondutorExterno').value = '';
-    document.getElementById('rgCondutorExterno').value = '';
-    document.getElementById('nomeOcupanteExterno').value = '';
-    document.getElementById('rgOcupanteExterno').value = '';
-    document.getElementById('areaOcupanteExterno').classList.add('oculto');
-    renderizarOcupantesViatura();
-
-    document.getElementById('tipoRegistro').value = 'Pessoa cadastrada';
-    selecionarModoRegistro('Individual');
-  }
-
-  function mostrarMensagem(texto, tipo = 'sucesso') {
-    const mensagem = document.getElementById('mensagemSistema');
-
-    if (!mensagem) {
-      console.log(texto);
-      return;
-    }
-
-    mensagem.textContent = texto;
-    mensagem.classList.remove('oculto', 'sucesso', 'erro');
-    mensagem.classList.add(tipo);
-
-    setTimeout(() => {
-      mensagem.classList.add('oculto');
-    }, 3500);
-  }
-
-  function carregarGuardaAtivo() {
-    google.script.run
-      .withSuccessHandler((guarda) => {
-        guardaAtual = guarda;
-        atualizarTelaGuarda();
-      })
-      .withFailureHandler((erro) => {
-        mostrarMensagem('Erro ao carregar guarda: ' + erro.message, 'erro');
-      })
-      .getGuardaAtivo();
-  }
-
-  function atualizarTelaGuarda() {
-    const status = document.getElementById('statusGuarda');
-    const areaAssumir = document.getElementById('areaAssumirGuarda');
-    const btnEncerrar = document.getElementById('btnEncerrarGuarda');
-    const btnTrocar = document.getElementById('btnTrocarGuarda');
-
-    status.classList.remove('sem-guarda', 'com-guarda');
-
-    if (guardaAtual) {
-      const esteAparelhoAssumiu = aparelhoAssumiuGuardaAtual();
-
-      status.classList.add('com-guarda');
-      status.innerHTML = `
-        Guarda atual:<br>
-        ${guardaAtual.Nome_Guarda} — RG ${guardaAtual.RG_Guarda}
-      `;
-
-      areaAssumir.classList.add('oculto');
-
-      if (btnEncerrar) {
-        btnEncerrar.classList.toggle('oculto', !esteAparelhoAssumiu);
-      }
-
-      if (btnTrocar) {
-        btnTrocar.classList.toggle('oculto', esteAparelhoAssumiu);
-      }
-
-    } else {
-      status.classList.add('sem-guarda');
-      status.textContent = 'Nenhum guarda ativo. Valide seu e-mail para assumir a Guarda neste celular.';
-
-      areaAssumir.classList.remove('oculto');
-
-      if (btnEncerrar) {
-        btnEncerrar.classList.add('oculto');
-      }
-
-      if (btnTrocar) {
-        btnTrocar.classList.add('oculto');
-      }
-
-      limparGuardaLocal();
-    }
-
-    atualizarPermissaoLancamento();
-  }
-
-  function mostrarAreaTrocaGuarda() {
-    document.getElementById('areaAssumirGuarda').classList.remove('oculto');
-    mostrarMensagem('Informe seu e-mail para assumir a Guarda neste celular. A sessão anterior será encerrada após a confirmação.', 'sucesso');
-  }  
-
-  function enviarCodigoGuarda() {
-    const email = document.getElementById('emailGuarda').value.trim().toLowerCase();
-
-    if (!email || !email.includes('@')) {
-      mostrarMensagem('Informe um e-mail válido.', 'erro');
-      return;
-    }
-
-    google.script.run
-      .withSuccessHandler((resposta) => {
-        dadosCodigoGuarda = {
-          email: resposta.email,
-          encontradoNoEfetivo: resposta.encontradoNoEfetivo,
-          militar: resposta.militar || null
-        };
-
-        salvarCodigoGuardaPendente(resposta.email);
-
-        document.getElementById('areaCodigoGuarda').classList.remove('oculto');
-
-        mostrarMensagem('Código enviado. Você pode abrir seu e-mail e voltar para informar o código.', 'sucesso');
-      })
-      .withFailureHandler((erro) => {
-        mostrarMensagem('Erro ao enviar código: ' + erro.message, 'erro');
-      })
-      .enviarCodigoAssumirGuarda(email);
-  }
-
-  function validarCodigoGuarda() {
-    const email = document.getElementById('emailGuarda').value.trim().toLowerCase();
-    const codigo = document.getElementById('codigoGuarda').value.trim();
-
-    if (!email || !codigo) {
-      mostrarMensagem('Informe o e-mail e o código.', 'erro');
-      return;
-    }
-
-    google.script.run
-      .withSuccessHandler((resposta) => {
-        dadosCodigoGuarda = {
-          email: resposta.email,
-          encontradoNoEfetivo: resposta.encontradoNoEfetivo,
-          militar: resposta.militar || null,
-          ticketAssuncao: resposta.ticketAssuncao || ''
-        };
-
-        limparCodigoGuardaPendente();
-
-        const areaMilitar = document.getElementById('areaMilitarIdentificado');
-        const areaManual = document.getElementById('areaIdentificacaoManual');
-        const btnAssumir = document.getElementById('btnAssumirGuarda');
-
-        areaMilitar.classList.remove('oculto', 'erro');
-        btnAssumir.classList.remove('oculto');
-
-        if (resposta.encontradoNoEfetivo && resposta.militar) {
-          areaMilitar.innerHTML = `
-            E-mail validado.<br>
-            Militar identificado:<br>
-            ${resposta.militar.Nome} — RG ${resposta.militar.RG}
-          `;
-          areaManual.classList.add('oculto');
-        } else {
-          areaMilitar.innerHTML = `
-            E-mail validado, mas não localizado no efetivo.<br>
-            Informe RG e nome do militar.
-          `;
-          areaManual.classList.remove('oculto');
-        }
-
-        mostrarMensagem('Código validado com sucesso.', 'sucesso');
-      })
-      .withFailureHandler((erro) => {
-        mostrarMensagem('Erro ao validar código: ' + erro.message, 'erro');
-      })
-      .validarCodigoAssumirGuarda(email, codigo);
-  }
-
-  function assumirGuarda(encerrarAnterior = false) {
-    if (!dadosCodigoGuarda) {
-      mostrarMensagem('Valide o e-mail antes de assumir a Guarda.', 'erro');
-      return;
-    }
-
-    const botao = document.getElementById('btnAssumirGuarda');
-    botao.disabled = true;
-    botao.textContent = 'Assumindo...';
-
-    const dados = {
-      email: dadosCodigoGuarda.email,
-      origemIdentificacao: dadosCodigoGuarda.encontradoNoEfetivo ? 'Efetivo' : 'Manual',
-      militar: dadosCodigoGuarda.militar,
-      rgManual: document.getElementById('rgGuardaManual').value.trim(),
-      nomeManual: document.getElementById('nomeGuardaManual').value.trim(),
-      encerrarAnterior: encerrarAnterior,
-      ticketAssuncao: dadosCodigoGuarda.ticketAssuncao || ''
-    };
-
-    google.script.run
-      .withSuccessHandler((resposta) => {
-        botao.disabled = false;
-        botao.textContent = 'Assumir neste celular';
-
-        if (resposta && resposta.requerConfirmacaoTroca && resposta.guardaAtivo) {
-          const g = resposta.guardaAtivo;
-
-          abrirModalConfirmacao(
-            'Guarda já assumida',
-            `Já existe um guarda ativo:<br><br>
-            <strong>${g.Nome_Guarda} — RG ${g.RG_Guarda}</strong><br><br>
-            Deseja encerrar a sessão anterior e assumir a Guarda neste celular?`,
+  functi…3163 tokens truncated…” RG ${g.RG_Guarda}</strong><br><br>
+            Deseja encerrar a sessÃ£o anterior e assumir a Guarda neste celular?`,
             () => assumirGuarda(true),
             true
           );
@@ -905,7 +609,7 @@ Object.defineProperty(window.google.script, 'run', {
         if (resposta && resposta.guarda) {
           guardaAtual = resposta.guarda;
 
-          // Autoriza o celular pessoal usado pelo guarda durante este serviço.
+          // Autoriza o celular pessoal usado pelo guarda durante este serviÃ§o.
           salvarGuardaLocal(resposta.guarda);
 
           atualizarTelaGuarda();
@@ -925,7 +629,7 @@ Object.defineProperty(window.google.script, 'run', {
   function encerrarGuarda() {
     abrirModalConfirmacao(
       'Encerrar Guarda',
-      'Para encerrar a Guarda, será enviado um código para o e-mail do guarda atual.<br><br>Deseja enviar o código?',
+      'Para encerrar a Guarda, serÃ¡ enviado um cÃ³digo para o e-mail do guarda atual.<br><br>Deseja enviar o cÃ³digo?',
       () => enviarCodigoParaEncerrarGuarda(),
       true
     );
@@ -1036,14 +740,30 @@ Object.defineProperty(window.google.script, 'run', {
       militar: null
     };
 
-    mostrarMensagem('Código pendente restaurado. Digite o código recebido por e-mail.', 'sucesso');
+    mostrarMensagem('CÃ³digo pendente restaurado. Digite o cÃ³digo recebido por e-mail.', 'sucesso');
   }
 
-  function aplicarCodigoDoLink() {
+function aplicarCodigoDoLink() {
   const email = window.PARAM_EMAIL_GUARDA || '';
   const codigo = window.PARAM_CODIGO_GUARDA || '';
+  const perfil = String(window.PARAM_PERFIL || '').toLowerCase();
 
   if (!email || !codigo) {
+    return;
+  }
+
+  if (perfil === 'comandante') {
+    document.getElementById('emailComandante').value = email;
+    document.getElementById('codigoComandante').value = codigo;
+    document.getElementById('areaCodigoComandante').classList.remove('oculto');
+
+    dadosCodigoComandante = {
+      email: email,
+      militar: null
+    };
+
+    mostrarMensagem('CÃ³digo do comandante recebido pelo link. Validando...', 'sucesso');
+    setTimeout(() => validarCodigoComandante(), 500);
     return;
   }
 
@@ -1057,12 +777,319 @@ Object.defineProperty(window.google.script, 'run', {
     militar: null
   };
 
-  mostrarMensagem('Código recebido pelo link. Validando...', 'sucesso');
+  mostrarMensagem('CÃ³digo recebido pelo link. Validando...', 'sucesso');
 
   setTimeout(() => {
     validarCodigoGuarda();
   }, 500);
 }
+
+function carregarComandanteAtivo() {
+  google.script.run
+    .withSuccessHandler((comandante) => {
+      comandanteAtual = comandante;
+      atualizarTelaComandante();
+    })
+    .withFailureHandler((erro) => {
+      mostrarMensagem('Erro ao carregar comandante: ' + erro.message, 'erro');
+    })
+    .getComandanteAtivo();
+}
+
+function atualizarTelaComandante() {
+  const status = document.getElementById('statusComandante');
+  const areaAssumir = document.getElementById('areaAssumirComandante');
+  const btnEncerrar = document.getElementById('btnEncerrarComandante');
+  const btnTrocar = document.getElementById('btnTrocarComandante');
+
+  status.classList.remove('sem-guarda', 'com-guarda');
+
+  if (comandanteAtual) {
+    const esteAparelhoAssumiu = aparelhoAssumiuComandanteAtual();
+
+    status.classList.add('com-guarda');
+    status.innerHTML = `
+      Comandante atual:<br>
+      ${comandanteAtual.Nome_Comandante} â€” RG ${comandanteAtual.RG_Comandante}
+    `;
+
+    areaAssumir.classList.add('oculto');
+    btnEncerrar.classList.toggle('oculto', !esteAparelhoAssumiu);
+    btnTrocar.classList.toggle('oculto', esteAparelhoAssumiu);
+  } else {
+    status.classList.add('sem-guarda');
+    status.textContent = 'Nenhum Comandante da Guarda ativo. Valide seu e-mail para assumir neste celular.';
+    areaAssumir.classList.remove('oculto');
+    btnEncerrar.classList.add('oculto');
+    btnTrocar.classList.add('oculto');
+    limparComandanteLocal();
+  }
+}
+
+function mostrarAreaTrocaComandante() {
+  document.getElementById('areaAssumirComandante').classList.remove('oculto');
+  mostrarMensagem(
+    'Informe seu e-mail cadastrado para assumir como Comandante da Guarda. A sessÃ£o anterior do comandante serÃ¡ encerrada apÃ³s a confirmaÃ§Ã£o.',
+    'sucesso'
+  );
+}
+
+function enviarCodigoComandante() {
+  const email = document.getElementById('emailComandante').value.trim().toLowerCase();
+
+  if (!email || !email.includes('@')) {
+    mostrarMensagem('Informe um e-mail vÃ¡lido.', 'erro');
+    return;
+  }
+
+  google.script.run
+    .withSuccessHandler((resposta) => {
+      dadosCodigoComandante = {
+        email: resposta.email,
+        militar: resposta.militar || null,
+        ticketAssuncao: ''
+      };
+
+      salvarCodigoComandantePendente(resposta.email);
+      document.getElementById('areaCodigoComandante').classList.remove('oculto');
+      mostrarMensagem('CÃ³digo enviado ao e-mail cadastrado do comandante.', 'sucesso');
+    })
+    .withFailureHandler((erro) => {
+      mostrarMensagem('Erro ao enviar cÃ³digo do comandante: ' + erro.message, 'erro');
+    })
+    .enviarCodigoAssumirComandante(email);
+}
+
+function validarCodigoComandante() {
+  const email = document.getElementById('emailComandante').value.trim().toLowerCase();
+  const codigo = document.getElementById('codigoComandante').value.trim();
+
+  if (!email || !codigo) {
+    mostrarMensagem('Informe o e-mail e o cÃ³digo do comandante.', 'erro');
+    return;
+  }
+
+  google.script.run
+    .withSuccessHandler((resposta) => {
+      dadosCodigoComandante = {
+        email: resposta.email,
+        militar: resposta.militar || null,
+        ticketAssuncao: resposta.ticketAssuncao || ''
+      };
+
+      limparCodigoComandantePendente();
+
+      const area = document.getElementById('areaComandanteIdentificado');
+      area.classList.remove('oculto', 'erro');
+      area.innerHTML = `
+        E-mail validado.<br>
+        Militar identificado:<br>
+        ${resposta.militar.Nome} â€” RG ${resposta.militar.RG}
+      `;
+
+      document.getElementById('btnAssumirComandante').classList.remove('oculto');
+      mostrarMensagem('Comandante identificado com sucesso.', 'sucesso');
+    })
+    .withFailureHandler((erro) => {
+      mostrarMensagem('Erro ao validar comandante: ' + erro.message, 'erro');
+    })
+    .validarCodigoAssumirComandante(email, codigo);
+}
+
+function assumirComandante(encerrarAnterior = false) {
+  if (!dadosCodigoComandante || !dadosCodigoComandante.militar) {
+    mostrarMensagem('Valide o e-mail antes de assumir como comandante.', 'erro');
+    return;
+  }
+
+  const botao = document.getElementById('btnAssumirComandante');
+  botao.disabled = true;
+  botao.textContent = 'Assumindo...';
+
+  google.script.run
+    .withSuccessHandler((resposta) => {
+      botao.disabled = false;
+      botao.textContent = 'Assumir como comandante';
+
+      if (resposta && resposta.requerConfirmacaoTroca && resposta.comandanteAtivo) {
+        const comandante = resposta.comandanteAtivo;
+
+        abrirModalConfirmacao(
+          'Comandante jÃ¡ assumido',
+          `JÃ¡ existe um Comandante da Guarda ativo:<br><br>
+          <strong>${comandante.Nome_Comandante} â€” RG ${comandante.RG_Comandante}</strong><br><br>
+          Deseja encerrar somente a sessÃ£o do comandante anterior e assumir neste celular?`,
+          () => assumirComandante(true),
+          true
+        );
+        return;
+      }
+
+      mostrarMensagem(resposta.mensagem || 'Comandante da Guarda assumido com sucesso.', 'sucesso');
+
+      if (resposta && resposta.comandante) {
+        comandanteAtual = resposta.comandante;
+        salvarComandanteLocal(resposta.comandante);
+        atualizarTelaComandante();
+      }
+
+      limparAreaComandante();
+    })
+    .withFailureHandler((erro) => {
+      mostrarMensagem('Erro ao assumir como comandante: ' + erro.message, 'erro');
+      botao.disabled = false;
+      botao.textContent = 'Assumir como comandante';
+    })
+    .assumirComandanteComEmailValidado({
+      email: dadosCodigoComandante.email,
+      militar: dadosCodigoComandante.militar,
+      ticketAssuncao: dadosCodigoComandante.ticketAssuncao || '',
+      encerrarAnterior: encerrarAnterior
+    });
+}
+
+function encerrarComandante() {
+  abrirModalConfirmacao(
+    'Encerrar Comandante da Guarda',
+    'SerÃ¡ enviado um cÃ³digo para o e-mail do comandante atual.<br><br>Deseja continuar?',
+    () => enviarCodigoParaEncerrarComandante(),
+    true
+  );
+}
+
+function enviarCodigoParaEncerrarComandante() {
+  const botao = document.getElementById('btnEncerrarComandante');
+  botao.disabled = true;
+  botao.textContent = 'Enviando...';
+
+  google.script.run
+    .withSuccessHandler((resposta) => {
+      emailEncerramentoComandante = resposta.email;
+      document.getElementById('areaCodigoEncerrarComandante').classList.remove('oculto');
+      mostrarMensagem('CÃ³digo enviado ao e-mail do comandante atual.', 'sucesso');
+      botao.disabled = false;
+      botao.textContent = 'Sair';
+    })
+    .withFailureHandler((erro) => {
+      mostrarMensagem('Erro ao enviar cÃ³digo do comandante: ' + erro.message, 'erro');
+      botao.disabled = false;
+      botao.textContent = 'Sair';
+    })
+    .enviarCodigoEncerrarComandante();
+}
+
+function validarCodigoEEncerrarComandante() {
+  const codigo = document.getElementById('codigoEncerrarComandante').value.trim();
+
+  if (!emailEncerramentoComandante || !codigo) {
+    mostrarMensagem('Informe o cÃ³digo enviado ao comandante atual.', 'erro');
+    return;
+  }
+
+  google.script.run
+    .withSuccessHandler((resposta) => {
+      mostrarMensagem(resposta.mensagem || 'Comandante da Guarda encerrado com sucesso.', 'sucesso');
+      comandanteAtual = null;
+      emailEncerramentoComandante = null;
+      limparComandanteLocal();
+      limparAreaComandante();
+      atualizarTelaComandante();
+    })
+    .withFailureHandler((erro) => {
+      mostrarMensagem('Erro ao encerrar comandante: ' + erro.message, 'erro');
+    })
+    .validarCodigoEEncerrarComandante(emailEncerramentoComandante, codigo);
+}
+
+function limparAreaComandante() {
+  dadosCodigoComandante = null;
+  emailEncerramentoComandante = null;
+  limparCodigoComandantePendente();
+
+  [
+    'emailComandante',
+    'codigoComandante',
+    'codigoEncerrarComandante'
+  ].forEach(id => {
+    const campo = document.getElementById(id);
+    if (campo) campo.value = '';
+  });
+
+  [
+    'areaCodigoComandante',
+    'areaCodigoEncerrarComandante',
+    'areaComandanteIdentificado',
+    'btnAssumirComandante'
+  ].forEach(id => {
+    const elemento = document.getElementById(id);
+    if (elemento) elemento.classList.add('oculto');
+  });
+
+  const identificado = document.getElementById('areaComandanteIdentificado');
+  if (identificado) identificado.innerHTML = '';
+}
+
+function salvarCodigoComandantePendente(email) {
+  localStorage.setItem('comandante_email_pendente', email);
+  localStorage.setItem('comandante_codigo_pendente_em', new Date().toISOString());
+}
+
+function limparCodigoComandantePendente() {
+  localStorage.removeItem('comandante_email_pendente');
+  localStorage.removeItem('comandante_codigo_pendente_em');
+}
+
+function restaurarCodigoComandantePendente() {
+  const email = localStorage.getItem('comandante_email_pendente');
+  const geradoEm = localStorage.getItem('comandante_codigo_pendente_em');
+
+  if (!email || !geradoEm) return;
+
+  if ((new Date() - new Date(geradoEm)) / 60000 > 10) {
+    limparCodigoComandantePendente();
+    return;
+  }
+
+  document.getElementById('emailComandante').value = email;
+  document.getElementById('areaCodigoComandante').classList.remove('oculto');
+  dadosCodigoComandante = { email: email, militar: null, ticketAssuncao: '' };
+}
+
+function salvarComandanteLocal(comandante) {
+  if (!comandante || !comandante.ID_ComandanteGuarda) return;
+
+  localStorage.setItem('comandante_id_local', comandante.ID_ComandanteGuarda);
+  localStorage.setItem('comandante_nome_local', comandante.Nome_Comandante || '');
+  localStorage.setItem('comandante_rg_local', comandante.RG_Comandante || '');
+  localStorage.setItem('comandante_email_local', comandante.Email_Comandante || '');
+
+  if (comandante.Sessao_Token) {
+    localStorage.setItem('comandante_sessao_token', comandante.Sessao_Token);
+  }
+}
+
+function limparComandanteLocal() {
+  localStorage.removeItem('comandante_id_local');
+  localStorage.removeItem('comandante_nome_local');
+  localStorage.removeItem('comandante_rg_local');
+  localStorage.removeItem('comandante_email_local');
+  localStorage.removeItem('comandante_sessao_token');
+}
+
+function aparelhoAssumiuComandanteAtual() {
+  if (!comandanteAtual || !comandanteAtual.ID_ComandanteGuarda) return false;
+
+  const idLocal = localStorage.getItem('comandante_id_local');
+  const tokenLocal = localStorage.getItem('comandante_sessao_token');
+
+  return !!(
+    idLocal &&
+    idLocal === comandanteAtual.ID_ComandanteGuarda &&
+    comandanteAtual.Sessao_Valida !== false &&
+    (tokenLocal || typeof URL_API === 'undefined')
+  );
+}
+
 
 let acaoConfirmadaModal = null;
 
@@ -1099,7 +1126,7 @@ function enviarCodigoParaEncerrarGuarda() {
       document.getElementById('areaCodigoEncerrarGuarda').classList.remove('oculto');
 
       mostrarMensagem(
-        'Código enviado para o e-mail do guarda atual. Informe o código para encerrar.',
+        'CÃ³digo enviado para o e-mail do guarda atual. Informe o cÃ³digo para encerrar.',
         'sucesso'
       );
 
@@ -1107,7 +1134,7 @@ function enviarCodigoParaEncerrarGuarda() {
       botao.textContent = 'Sair';
     })
     .withFailureHandler((erro) => {
-      mostrarMensagem('Erro ao enviar código: ' + erro.message, 'erro');
+      mostrarMensagem('Erro ao enviar cÃ³digo: ' + erro.message, 'erro');
 
       botao.disabled = false;
       botao.textContent = 'Sair';
@@ -1119,7 +1146,7 @@ function validarCodigoEEncerrarGuarda() {
   const codigo = document.getElementById('codigoEncerrarGuarda').value.trim();
 
   if (!emailEncerramentoGuarda || !codigo) {
-    mostrarMensagem('Informe o código enviado ao guarda atual.', 'erro');
+    mostrarMensagem('Informe o cÃ³digo enviado ao guarda atual.', 'erro');
     return;
   }
 
