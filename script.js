@@ -57,6 +57,12 @@ function montarDadosChamadaApi(nome, argumentos) {
       return { sessaoToken: sessaoComandanteToken };
     case 'getPainelComandante':
       return { sessaoToken: sessaoComandanteToken };
+    case 'getDadosSOS':
+      return { sessaoToken: sessaoToken };
+    case 'cadastrarViatura':
+      return { viatura: argumentos[0], sessaoToken: sessaoComandanteToken };
+    case 'registrarMovimentacaoSOS':
+      return { sos: argumentos[0], sessaoToken: sessaoToken };
     case 'buscarPessoasPorRgCpf':
       return { rgCpf: argumentos[0], sessaoToken: sessaoToken };
     case 'registrarMovimentacao':
@@ -158,6 +164,9 @@ function criarExecutorAppsScript() {
     'getGuardaAtivo',
     'getComandanteAtivo',
     'getPainelComandante',
+    'getDadosSOS',
+    'cadastrarViatura',
+    'registrarMovimentacaoSOS',
     'buscarPessoasPorRgCpf',
     'registrarMovimentacao',
     'enviarCodigoAssumirGuarda',
@@ -195,6 +204,9 @@ Object.defineProperty(window.google.script, 'run', {
   let ocupantesViatura = [];
   let destinos = [];
   let procedencias = [];
+  let viaturasSOS = [];
+  let militaresSOS = [];
+  let selecoesViaturasSOS = {};
 
   let dadosCodigoGuarda = null;
   let guardaAtual = null;
@@ -230,6 +242,10 @@ Object.defineProperty(window.google.script, 'run', {
 
     preencherDestinos();
     preencherProcedencias();
+
+    if (modoRegistroAtual === 'SOS') {
+      renderizarSelecaoViaturasSOS();
+    }
   }
 
   function normalizarPrefixoPlaca(campo) {
@@ -239,21 +255,35 @@ Object.defineProperty(window.google.script, 'run', {
   }
 
   function selecionarModoRegistro(modo) {
-    modoRegistroAtual = modo === 'Viatura' ? 'Viatura' : 'Individual';
+    modoRegistroAtual = ['Viatura', 'SOS'].includes(modo) ? modo : 'Individual';
 
     document.getElementById('btnModoIndividual').classList.toggle('ativo', modoRegistroAtual === 'Individual');
     document.getElementById('btnModoViatura').classList.toggle('ativo', modoRegistroAtual === 'Viatura');
+    document.getElementById('btnModoSOS').classList.toggle('ativo', modoRegistroAtual === 'SOS');
 
     const isViatura = modoRegistroAtual === 'Viatura';
+    const isSOS = modoRegistroAtual === 'SOS';
     const tipoRegistro = document.getElementById('tipoRegistro');
 
-    if (isViatura) {
+    if (isSOS) {
+      tipoMovimentacaoAtual = 'Saída';
+      selecoesViaturasSOS = {};
+      document.getElementById('btnEntrada').classList.remove('ativo');
+      document.getElementById('btnSaida').classList.add('ativo');
+      carregarDadosSOS();
+    } else if (isViatura) {
       tipoRegistro.value = 'Pessoa cadastrada';
     } else {
       condutorExternoAtivo = false;
       ocupantesViatura = [];
       renderizarOcupantesViatura();
     }
+
+    document.getElementById('areaRegistroPadrao').classList.toggle('oculto', isSOS);
+    document.getElementById('areaRegistroSOS').classList.toggle('oculto', !isSOS);
+    document.getElementById('labelTipoMovimentacao').textContent = isSOS ? 'Movimentação de SOS' : 'Tipo de movimentação';
+    document.getElementById('textoBtnEntrada').textContent = isSOS ? 'Retorno' : 'Entrada';
+    document.getElementById('textoBtnSaida').textContent = 'Saída';
 
     document.getElementById('campoTipoRegistro').classList.toggle('oculto', isViatura);
     document.getElementById('areaOcupantesViatura').classList.toggle('oculto', !isViatura);
@@ -271,9 +301,13 @@ Object.defineProperty(window.google.script, 'run', {
       : 'Opcional';
     document.getElementById('btnRegistrarMovimentacao').textContent = isViatura
       ? 'Registrar viatura'
-      : 'Registrar';
+      : isSOS
+        ? 'Registrar saída SOS'
+        : 'Registrar';
 
-    alternarTipoRegistro();
+    if (!isSOS) {
+      alternarTipoRegistro();
+    }
   }
 
   function alternarTipoRegistro() {
@@ -310,6 +344,222 @@ Object.defineProperty(window.google.script, 'run', {
         mostrarMensagem('Erro ao carregar listas: ' + erro.message, 'erro');
       })
       .getListasFormulario();
+  }
+
+  function carregarDadosSOS() {
+    google.script.run
+      .withSuccessHandler((dados) => {
+        viaturasSOS = dados.viaturas || [];
+        militaresSOS = dados.militares || [];
+        renderizarSelecaoViaturasSOS();
+      })
+      .withFailureHandler((erro) => {
+        mostrarMensagem('Erro ao carregar viaturas de SOS: ' + erro.message, 'erro');
+      })
+      .getDadosSOS();
+  }
+
+  function renderizarSelecaoViaturasSOS() {
+    const lista = document.getElementById('listaViaturasSOS');
+    const configuracoes = document.getElementById('configuracoesViaturasSOS');
+
+    if (!lista || !configuracoes) return;
+
+    const retorno = tipoMovimentacaoAtual === 'Entrada';
+    const situacaoNecessaria = retorno ? 'Em ocorrência' : 'No quartel';
+    const disponiveis = viaturasSOS.filter(item => item.Situacao_Atual === situacaoNecessaria);
+    document.getElementById('tituloSelecaoSOS').textContent = retorno
+      ? 'Selecionar viaturas que retornaram'
+      : 'Selecionar viaturas para saída';
+    document.getElementById('btnRegistrarMovimentacao').textContent = retorno
+      ? 'Registrar retorno SOS'
+      : 'Registrar saída SOS';
+
+    Object.keys(selecoesViaturasSOS).forEach(id => {
+      if (!disponiveis.some(item => item.ID_Viatura === id)) {
+        delete selecoesViaturasSOS[id];
+      }
+    });
+
+    lista.innerHTML = '';
+
+    if (!disponiveis.length) {
+      lista.appendChild(criarEstadoVazioPainel(
+        retorno
+          ? 'Não há viaturas em ocorrência.'
+          : 'Não há viaturas disponíveis no quartel.'
+      ));
+      configuracoes.innerHTML = '';
+      return;
+    }
+
+    disponiveis.forEach(viatura => {
+      const rotulo = document.createElement('label');
+      rotulo.className = 'opcao-viatura-sos';
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = Boolean(selecoesViaturasSOS[viatura.ID_Viatura]);
+      checkbox.onchange = () => alternarViaturaSOS(viatura, checkbox.checked);
+
+      const texto = document.createElement('span');
+      const prefixo = document.createElement('strong');
+      prefixo.textContent = viatura.Prefixo;
+      const descricao = document.createElement('small');
+      descricao.textContent = viatura.Descricao || viatura.Situacao_Atual;
+      texto.appendChild(prefixo);
+      texto.appendChild(descricao);
+      rotulo.appendChild(checkbox);
+      rotulo.appendChild(texto);
+      lista.appendChild(rotulo);
+    });
+
+    renderizarConfiguracoesSOS();
+  }
+
+  function alternarViaturaSOS(viatura, selecionada) {
+    if (selecionada) {
+      selecoesViaturasSOS[viatura.ID_Viatura] = {
+        ID_Viatura: viatura.ID_Viatura,
+        ID_Condutor: tipoMovimentacaoAtual === 'Entrada' ? viatura.ID_Condutor_Atual : '',
+        IDs_Guarnicao: tipoMovimentacaoAtual === 'Entrada'
+          ? (viatura.IDs_Guarnicao_Atual || []).slice()
+          : []
+      };
+    } else {
+      delete selecoesViaturasSOS[viatura.ID_Viatura];
+    }
+
+    renderizarConfiguracoesSOS();
+  }
+
+  function criarSelectMilitaresSOS(valorAtual, textoInicial) {
+    const select = document.createElement('select');
+    const inicial = document.createElement('option');
+    inicial.value = '';
+    inicial.textContent = textoInicial;
+    select.appendChild(inicial);
+
+    militaresSOS.forEach(militar => {
+      const option = document.createElement('option');
+      option.value = militar.ID_Pessoa;
+      option.textContent = militar.Nome + (militar.RG_CPF ? ' — ' + militar.RG_CPF : '');
+      option.selected = militar.ID_Pessoa === valorAtual;
+      select.appendChild(option);
+    });
+
+    return select;
+  }
+
+  function renderizarConfiguracoesSOS() {
+    const area = document.getElementById('configuracoesViaturasSOS');
+    area.innerHTML = '';
+
+    Object.values(selecoesViaturasSOS).forEach(selecao => {
+      const viatura = viaturasSOS.find(item => item.ID_Viatura === selecao.ID_Viatura);
+      if (!viatura) return;
+
+      const card = document.createElement('div');
+      card.className = 'configuracao-viatura-sos';
+      const titulo = document.createElement('strong');
+      titulo.textContent = viatura.Prefixo + (viatura.Descricao ? ' — ' + viatura.Descricao : '');
+      card.appendChild(titulo);
+
+      const labelCondutor = document.createElement('label');
+      labelCondutor.textContent = 'Condutor';
+      const selectCondutor = criarSelectMilitaresSOS(selecao.ID_Condutor, 'Selecione o condutor');
+      selectCondutor.disabled = tipoMovimentacaoAtual === 'Entrada';
+      selectCondutor.onchange = () => {
+        selecao.ID_Condutor = selectCondutor.value;
+        selecao.IDs_Guarnicao = selecao.IDs_Guarnicao.filter(id => id !== selectCondutor.value);
+        renderizarConfiguracoesSOS();
+      };
+      card.appendChild(labelCondutor);
+      card.appendChild(selectCondutor);
+
+      const labelGuarnicao = document.createElement('label');
+      labelGuarnicao.textContent = 'Guarnição (opcional)';
+      card.appendChild(labelGuarnicao);
+      const linhaAdicionar = document.createElement('div');
+      linhaAdicionar.className = 'linha-adicionar-guarnicao';
+      const selectGuarnicao = criarSelectMilitaresSOS('', 'Selecione um integrante');
+      Array.from(selectGuarnicao.options).forEach(option => {
+        if (option.value && (
+          option.value === selecao.ID_Condutor ||
+          selecao.IDs_Guarnicao.includes(option.value)
+        )) {
+          option.remove();
+        }
+      });
+      const adicionar = document.createElement('button');
+      adicionar.type = 'button';
+      adicionar.textContent = 'Adicionar';
+      adicionar.onclick = () => {
+        if (selectGuarnicao.value) {
+          selecao.IDs_Guarnicao.push(selectGuarnicao.value);
+          renderizarConfiguracoesSOS();
+        }
+      };
+      linhaAdicionar.appendChild(selectGuarnicao);
+      linhaAdicionar.appendChild(adicionar);
+      card.appendChild(linhaAdicionar);
+
+      const chips = document.createElement('div');
+      chips.className = 'chips-guarnicao';
+      selecao.IDs_Guarnicao.forEach(id => {
+        const militar = militaresSOS.find(item => item.ID_Pessoa === id);
+        if (!militar) return;
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.textContent = militar.Nome + ' ×';
+        chip.onclick = () => {
+          selecao.IDs_Guarnicao = selecao.IDs_Guarnicao.filter(item => item !== id);
+          renderizarConfiguracoesSOS();
+        };
+        chips.appendChild(chip);
+      });
+      card.appendChild(chips);
+      area.appendChild(card);
+    });
+  }
+
+  function registrarSOS() {
+    const viaturas = Object.values(selecoesViaturasSOS);
+
+    if (!viaturas.length) {
+      mostrarMensagem('Selecione ao menos uma viatura.', 'erro');
+      return;
+    }
+
+    if (viaturas.some(item => !item.ID_Condutor)) {
+      mostrarMensagem('Selecione o condutor de cada viatura.', 'erro');
+      return;
+    }
+
+    const botao = document.getElementById('btnRegistrarMovimentacao');
+    botao.disabled = true;
+    botao.textContent = 'Registrando...';
+
+    google.script.run
+      .withSuccessHandler((resposta) => {
+        mostrarMensagem(resposta.mensagem || 'SOS registrado com sucesso.', 'sucesso');
+        viaturasSOS = resposta.dadosSOS ? resposta.dadosSOS.viaturas || [] : viaturasSOS;
+        militaresSOS = resposta.dadosSOS ? resposta.dadosSOS.militares || [] : militaresSOS;
+        selecoesViaturasSOS = {};
+        document.getElementById('observacoesSOS').value = '';
+        renderizarSelecaoViaturasSOS();
+        carregarPainelComandante(true);
+        botao.disabled = false;
+      })
+      .withFailureHandler((erro) => {
+        mostrarMensagem('Erro ao registrar SOS: ' + erro.message, 'erro');
+        botao.disabled = false;
+        renderizarSelecaoViaturasSOS();
+      })
+      .registrarMovimentacaoSOS({
+        tipoSOS: tipoMovimentacaoAtual === 'Entrada' ? 'Retorno' : 'Saída',
+        viaturas: viaturas,
+        observacoes: document.getElementById('observacoesSOS').value.trim()
+      });
   }
 
   function preencherDestinos() {
@@ -642,6 +892,11 @@ Object.defineProperty(window.google.script, 'run', {
   }
 
   function registrarMovimentacao() {
+    if (modoRegistroAtual === 'SOS') {
+      registrarSOS();
+      return;
+    }
+
     const tipoRegistro = document.getElementById('tipoRegistro').value;
 
     const dados = {
@@ -1249,6 +1504,8 @@ function renderizarPainelComandante(painel) {
 
   document.getElementById('totalPessoasDentro').textContent = totais.pessoasDentro || 0;
   document.getElementById('totalViaturasDentro').textContent = totais.viaturasDentro || 0;
+  document.getElementById('totalViaturasDisponiveis').textContent = totais.viaturasDisponiveis || 0;
+  document.getElementById('totalViaturasEmOcorrencia').textContent = totais.viaturasEmOcorrencia || 0;
   document.getElementById('totalMovimentacoesCiclo').textContent = totais.movimentacoesCiclo || 0;
   document.getElementById('cicloPainelComandante').textContent =
     painel.cicloInicio && painel.cicloFim
@@ -1259,6 +1516,74 @@ function renderizarPainelComandante(painel) {
 
   renderizarListaPessoasDentro(painel.dentro || []);
   renderizarListaMovimentacoesRecentes(painel.recentes || []);
+  renderizarViaturasQuartelPainel(painel.viaturasQuartel || []);
+}
+
+function renderizarViaturasQuartelPainel(viaturas) {
+  const lista = document.getElementById('listaViaturasQuartel');
+  lista.innerHTML = '';
+
+  if (!viaturas.length) {
+    lista.appendChild(criarEstadoVazioPainel('Nenhuma viatura do quartel cadastrada.'));
+    return;
+  }
+
+  viaturas.forEach(viatura => {
+    const item = document.createElement('div');
+    item.className = 'item-painel item-viatura-quartel ' +
+      (viatura.Situacao_Atual === 'Em ocorrência' ? 'viatura-em-sos' : 'viatura-disponivel');
+    const cabecalho = document.createElement('div');
+    cabecalho.className = 'cabecalho-item-painel';
+    const nome = document.createElement('strong');
+    nome.textContent = viatura.Prefixo + (viatura.Descricao ? ' — ' + viatura.Descricao : '');
+    const status = document.createElement('span');
+    status.textContent = viatura.Situacao_Atual;
+    cabecalho.appendChild(nome);
+    cabecalho.appendChild(status);
+    item.appendChild(cabecalho);
+
+    if (viatura.Nome_Condutor_Atual) {
+      const detalhes = document.createElement('div');
+      detalhes.className = 'detalhes-item-painel';
+      detalhes.textContent = 'Condutor: ' + viatura.Nome_Condutor_Atual;
+      item.appendChild(detalhes);
+    }
+
+    lista.appendChild(item);
+  });
+}
+
+function cadastrarViaturaQuartel() {
+  const prefixo = document.getElementById('prefixoNovaViatura').value.replace(/\s+/g, '').toUpperCase();
+  const descricao = document.getElementById('descricaoNovaViatura').value.trim();
+
+  if (!prefixo) {
+    mostrarMensagem('Informe o prefixo da viatura.', 'erro');
+    return;
+  }
+
+  const botao = document.getElementById('btnCadastrarViatura');
+  botao.disabled = true;
+  botao.textContent = 'Cadastrando...';
+
+  google.script.run
+    .withSuccessHandler((resposta) => {
+      mostrarMensagem(resposta.mensagem || 'Viatura cadastrada.', 'sucesso');
+      document.getElementById('prefixoNovaViatura').value = '';
+      document.getElementById('descricaoNovaViatura').value = '';
+      viaturasSOS = resposta.dadosSOS ? resposta.dadosSOS.viaturas || [] : viaturasSOS;
+      militaresSOS = resposta.dadosSOS ? resposta.dadosSOS.militares || [] : militaresSOS;
+      renderizarSelecaoViaturasSOS();
+      carregarPainelComandante(true);
+      botao.disabled = false;
+      botao.textContent = 'Cadastrar';
+    })
+    .withFailureHandler((erro) => {
+      mostrarMensagem('Erro ao cadastrar viatura: ' + erro.message, 'erro');
+      botao.disabled = false;
+      botao.textContent = 'Cadastrar';
+    })
+    .cadastrarViatura({ prefixo: prefixo, descricao: descricao });
 }
 
 function renderizarListaPessoasDentro(pessoas) {
