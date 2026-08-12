@@ -100,6 +100,8 @@ function montarDadosChamadaApi(nome, argumentos) {
       return argumentos[0] || {};
     case 'retomarPostoAposSOS':
       return { sessaoToken: sessaoToken };
+    case 'assumirHoraToqueFogo':
+      return { sessaoToqueToken: sessaoToqueToken };
     case 'enviarCodigoAssumirGuarda':
       return { email: argumentos[0] };
     case 'validarCodigoAssumirGuarda':
@@ -222,6 +224,7 @@ function criarExecutorAppsScript() {
     'enviarCodigoAssumirToqueFogo',
     'validarCodigoAssumirToqueFogo',
     'assumirToqueFogoComEmailValidado',
+    'assumirHoraToqueFogo',
     'retomarPostoAposSOS',
     'enviarCodigoAssumirGuarda',
     'validarCodigoAssumirGuarda',
@@ -2536,6 +2539,7 @@ function atualizarTelaToqueFogo() {
   const areaAssumir = document.getElementById('areaAssumirToqueFogo');
   const btnTrocar = document.getElementById('btnTrocarToqueFogo');
   const coberturaEl = document.getElementById('statusCoberturaToque');
+  const btnAssumirHora = document.getElementById('btnAssumirHoraToque');
   const btnRetomar = document.getElementById('btnRetomarPosto');
 
   periodoEl.textContent = (periodo.nome || 'Período atual') + ' • ' + (periodo.faixa || '');
@@ -2571,6 +2575,11 @@ function atualizarTelaToqueFogo() {
     cobertura.ID_GuardaServico_Titular === guardaAtual.ID_GuardaServico
   );
   btnRetomar.classList.toggle('oculto', !titularPodeRetomar);
+
+  const toquePodeAssumirHora = !!(
+    guardaAtual && toque && !cobertura && aparelhoAssumiuToqueAtual()
+  );
+  btnAssumirHora.classList.toggle('oculto', !toquePodeAssumirHora);
   atualizarPermissaoLancamento();
 }
 
@@ -2721,6 +2730,35 @@ function confirmarRetomadaPosto() {
     'Confirma que o militar da hora retornou e está retomando o posto da Guarda?',
     () => retomarPostoAposSOS()
   );
+}
+
+function confirmarAssuncaoHoraToque() {
+  abrirModalConfirmacao(
+    'Assumir hora',
+    'Confirma que o Toque de Fogo está assumindo imediatamente o posto do militar da hora?',
+    () => assumirHoraToqueFogo()
+  );
+}
+
+function assumirHoraToqueFogo() {
+  const botao = document.getElementById('btnAssumirHoraToque');
+  botao.disabled = true;
+  botao.textContent = 'Assumindo...';
+
+  google.script.run
+    .withSuccessHandler((resposta) => {
+      botao.disabled = false;
+      botao.textContent = 'Assumir hora';
+      statusToqueFogoAtual = resposta.statusToque || null;
+      atualizarTelaToqueFogo();
+      mostrarMensagem(resposta.mensagem, 'sucesso');
+    })
+    .withFailureHandler((erro) => {
+      botao.disabled = false;
+      botao.textContent = 'Assumir hora';
+      mostrarMensagem('Erro ao assumir a hora: ' + erro.message, 'erro');
+    })
+    .assumirHoraToqueFogo();
 }
 
 function retomarPostoAposSOS() {
