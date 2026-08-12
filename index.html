@@ -292,7 +292,7 @@
             <label>Forma do registro</label>
             <div class="botoes-segmentados" id="botoesModoRegistro">
               <button type="button" class="ativo" id="btnModoIndividual" onclick="selecionarModoRegistro('Individual')">Individual</button>
-              <button type="button" id="btnModoViatura" onclick="selecionarModoRegistro('Viatura')">Viatura</button>
+              <button type="button" id="btnModoViatura" onclick="selecionarModoRegistro('Viatura')">Auto/VTR</button>
               <button type="button" id="btnModoSOS" onclick="selecionarModoRegistro('SOS')">SOS</button>
             </div>
           </div>
@@ -351,7 +351,7 @@
           <div id="areaOcupantesViatura" class="bloco-viatura oculto">
             <div class="titulo-bloco-viatura">
               <div>
-                <strong>Outros ocupantes da viatura</strong>
+                <strong>Outros ocupantes do Auto/VTR</strong>
                 <span>O condutor já conta como ocupante. Inclua abaixo somente as demais pessoas, se houver.</span>
               </div>
               <span id="contadorOcupantesViatura" class="contador-ocupantes">0 adicionais</span>
@@ -386,7 +386,7 @@
                 <input type="text" id="rgOcupanteExterno" placeholder="Documento do militar">
               </div>
               <button type="button" class="botao-adicionar-externo" onclick="adicionarOcupanteExterno()">
-                Adicionar pessoa à viatura
+                Adicionar pessoa ao Auto/VTR
               </button>
             </div>
 
@@ -475,6 +475,6 @@
       </div>
     </div>
 
-  <script src="script.js?v=19.0.1"></script>
+  <script src="script.js?v=19.0.3"></script>
   </body>
 </html>
