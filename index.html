@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#111827">
     <title>Controle de Acesso - 1º GBM</title>
-  <link rel="stylesheet" href="style.css?v=15.0.0">
+  <link rel="stylesheet" href="style.css?v=19.0.0">
   </head>
 
   <body>
@@ -90,6 +90,56 @@
             </button>
           </div>
           
+        </section>
+
+        <section class="card card-toque-fogo" id="cardToqueFogo">
+          <div class="cabecalho-card-guarda">
+            <div>
+              <h2>Toque de Fogo</h2>
+              <span id="periodoToqueFogo" class="periodo-toque-fogo">Carregando período...</span>
+            </div>
+            <div class="acoes-guarda">
+              <button type="button" id="btnTrocarToqueFogo" class="botao-trocar oculto" onclick="mostrarAreaTrocaToqueFogo()">
+                Assumir / Trocar
+              </button>
+            </div>
+          </div>
+
+          <div id="statusToqueFogo" class="status-guarda">Carregando Toque de Fogo atual...</div>
+
+          <div id="statusCoberturaToque" class="status-cobertura-toque oculto"></div>
+          <button type="button" id="btnRetomarPosto" class="botao-retomar-posto oculto" onclick="confirmarRetomadaPosto()">
+            Retomar posto
+          </button>
+
+          <div id="areaAssumirToqueFogo">
+            <div class="campo">
+              <label>E-mail do militar</label>
+              <div class="linha-busca">
+                <input type="email" id="emailToqueFogo" placeholder="Digite o e-mail">
+                <button type="button" onclick="enviarCodigoToqueFogo()">Enviar</button>
+              </div>
+            </div>
+
+            <div id="areaCodigoToqueFogo" class="oculto">
+              <div class="campo">
+                <label>Código recebido por e-mail</label>
+                <div class="linha-busca">
+                  <input type="text" id="codigoToqueFogo" inputmode="numeric" placeholder="Digite o código">
+                  <button type="button" onclick="validarCodigoToqueFogo()">Validar</button>
+                </div>
+              </div>
+            </div>
+
+            <div id="areaToqueFogoIdentificado" class="resultado oculto"></div>
+            <div id="areaToqueFogoManual" class="oculto">
+              <div class="campo"><label>RG do militar</label><input type="text" id="rgToqueFogoManual" placeholder="RG do militar"></div>
+              <div class="campo"><label>Nome do militar</label><input type="text" id="nomeToqueFogoManual" placeholder="Ex.: SD COSTA"></div>
+            </div>
+            <button type="button" id="btnAssumirToqueFogo" class="botao-secundario oculto" onclick="assumirToqueFogo()">
+              Assumir Toque de Fogo
+            </button>
+          </div>
         </section>
 
         <section class="card card-pessoas-dentro-guarda oculto" id="cardPessoasDentroGuarda">
@@ -232,7 +282,7 @@
         </section>
 
         <div id="avisoSemPermissaoLancamento" class="aviso-bloqueio oculto">
-          Este celular ainda não está autorizado para a Guarda atual. Se você está assumindo o serviço, toque em “Assumir / Trocar” e valide seu e-mail.
+          Este celular não está autorizado para lançar registros. Assuma a Guarda ou, durante uma cobertura, valide-se como Toque de Fogo.
         </div>
 
         <section class="card" id="cardMovimentacao">
@@ -425,6 +475,7 @@
       </div>
     </div>
 
-  <script src="script.js?v=18.0.0"></script>
+  <script src="script.js?v=19.0.0"></script>
   </body>
 </html>
+
