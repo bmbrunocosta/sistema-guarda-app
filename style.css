@@ -87,9 +87,43 @@
   margin-top: 14px;
 }
 
-.card-comandante {
-  border-top: 4px solid #2563eb;
-}
+  .card-comandante {
+    border-top: 4px solid #2563eb;
+  }
+
+  .card-toque-fogo {
+    border-top: 4px solid #f59e0b;
+  }
+
+  .periodo-toque-fogo {
+    display: block;
+    margin-top: 4px;
+    color: #64748b;
+    font-size: 12px;
+  }
+
+  .status-cobertura-toque {
+    margin-top: 12px;
+    padding: 12px;
+    border: 1px solid #fbbf24;
+    border-radius: 12px;
+    background: #fffbeb;
+    color: #78350f;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .botao-retomar-posto {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    background: #15803d;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+  }
 
 .painel-comandante {
   margin-bottom: 14px;
@@ -1017,3 +1051,4 @@
   line-height: 1.35;
   margin-bottom: 14px;
 }
+
