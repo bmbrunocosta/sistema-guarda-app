@@ -2251,7 +2251,7 @@ function assumirComandante(encerrarAnterior = false) {
 function encerrarComandante() {
   abrirModalConfirmacao(
     'Encerrar Comandante da Guarda',
-    'Será enviado um código para o e-mail do comandante atual. Antes de confirmar, ele poderá registrar as alterações e observações do serviço.<br><br>O PDF só será criado após a validação do código e o encerramento do serviço.<br><br>Deseja continuar?',
+    'O encerramento fica disponível a partir das 07h. Será enviado um código para o e-mail do comandante atual e, antes de confirmar, ele poderá registrar as alterações e observações do serviço.<br><br>Se o encerramento ocorrer antes das 08h, o PDF ficará pendente e será gerado somente após o fechamento oficial do período.<br><br>Deseja continuar?',
     () => enviarCodigoParaEncerrarComandante(),
     true
   );
