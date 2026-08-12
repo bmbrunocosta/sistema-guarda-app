@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#111827">
     <title>Controle de Acesso - 1º GBM</title>
-  <link rel="stylesheet" href="style.css?v=19.0.2">
+  <link rel="stylesheet" href="style.css?v=22.0.0">
   </head>
 
   <body>
@@ -285,6 +285,43 @@
           Este celular não está autorizado para lançar registros. Assuma a Guarda ou, durante uma cobertura, valide-se como Toque de Fogo.
         </div>
 
+        <section class="card card-guarnicoes-servico oculto" id="cardGuarnicoesServico">
+          <div class="cabecalho-guarnicoes-servico">
+            <div>
+              <h2>Guarnições do serviço</h2>
+              <span id="cicloGuarnicoesServico">Ciclo das 08h às 08h</span>
+            </div>
+            <button type="button" id="btnAtualizarGuarnicoesServico" onclick="carregarGuarnicoesServico()">Atualizar</button>
+          </div>
+          <p class="descricao-guarnicoes-servico">
+            Defina a composição padrão de cada VTR. No SOS, ela será preenchida automaticamente e ainda poderá ser alterada.
+          </p>
+          <div id="resumoGuarnicoesServico" class="lista-guarnicoes-servico"></div>
+          <div class="editor-guarnicao-servico">
+            <div class="campo">
+              <label>VTR</label>
+              <select id="viaturaGuarnicaoServico" onchange="selecionarViaturaGuarnicaoServico()"></select>
+            </div>
+            <div class="campo">
+              <label>Condutor</label>
+              <select id="condutorGuarnicaoServico"></select>
+            </div>
+            <label>Guarnição (opcional)</label>
+            <div class="linha-adicionar-guarnicao">
+              <select id="integranteGuarnicaoServico"></select>
+              <button type="button" onclick="adicionarIntegranteGuarnicaoServico()">Adicionar</button>
+            </div>
+            <div id="chipsGuarnicaoServico" class="chips-guarnicao"></div>
+            <div class="campo campo-motivo-guarnicao">
+              <label>Motivo da alteração</label>
+              <input type="text" id="motivoGuarnicaoServico" placeholder="Opcional. Ex.: determinação do Oficial de Dia">
+            </div>
+            <button type="button" id="btnSalvarGuarnicaoServico" class="botao-secundario" onclick="salvarGuarnicaoServico()">
+              Salvar para o serviço
+            </button>
+          </div>
+        </section>
+
         <section class="card" id="cardMovimentacao">
           <h2>Registrar Movimentação</h2>
 
@@ -475,6 +512,7 @@
       </div>
     </div>
 
-  <script src="script.js?v=19.0.3"></script>
+  <script src="script.js?v=22.0.0"></script>
   </body>
 </html>
+
