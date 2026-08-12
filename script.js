@@ -48,10 +48,15 @@ function obterSessaoTokenToqueLocal() {
   return localStorage.getItem('toque_fogo_sessao_token') || '';
 }
 
+function obterSessaoTokenOficialLocal() {
+  return localStorage.getItem('oficial_dia_sessao_token') || '';
+}
+
 function montarDadosChamadaApi(nome, argumentos) {
   const sessaoToken = obterSessaoTokenLocal();
   const sessaoComandanteToken = obterSessaoTokenComandanteLocal();
   const sessaoToqueToken = obterSessaoTokenToqueLocal();
+  const sessaoOficialToken = obterSessaoTokenOficialLocal();
 
   switch (nome) {
     case 'getListasFormulario':
@@ -60,10 +65,12 @@ function montarDadosChamadaApi(nome, argumentos) {
       return { sessaoToken: sessaoToken };
     case 'getComandanteAtivo':
       return { sessaoToken: sessaoComandanteToken };
+    case 'getOficialDiaAtivo':
+      return { sessaoToken: sessaoOficialToken };
     case 'getStatusToqueFogo':
       return { sessaoToken: sessaoToqueToken };
     case 'getPainelComandante':
-      return { sessaoToken: sessaoComandanteToken };
+      return { sessaoToken: sessaoComandanteToken, sessaoOficialToken: sessaoOficialToken };
     case 'getPessoasDentroGuarda':
       return { sessaoToken: sessaoToken, sessaoToqueToken: sessaoToqueToken };
     case 'registrarSaidaRapidaPessoa':
@@ -72,21 +79,24 @@ function montarDadosChamadaApi(nome, argumentos) {
       return {
         sessaoToken: sessaoToken,
         sessaoToqueToken: sessaoToqueToken,
-        sessaoComandanteToken: sessaoComandanteToken
+        sessaoComandanteToken: sessaoComandanteToken,
+        sessaoOficialToken: sessaoOficialToken
       };
     case 'salvarGuarnicoesServico':
       return {
         guarnicoes: argumentos[0],
         sessaoToken: sessaoToken,
         sessaoToqueToken: sessaoToqueToken,
-        sessaoComandanteToken: sessaoComandanteToken
+        sessaoComandanteToken: sessaoComandanteToken,
+        sessaoOficialToken: sessaoOficialToken
       };
     case 'registrarMovimentacaoSOS':
       return {
         sos: argumentos[0],
         sessaoToken: sessaoToken,
         sessaoToqueToken: sessaoToqueToken,
-        sessaoComandanteToken: sessaoComandanteToken
+        sessaoComandanteToken: sessaoComandanteToken,
+        sessaoOficialToken: sessaoOficialToken
       };
     case 'buscarPessoasPorRgCpf':
       return { rgCpf: argumentos[0], sessaoToken: sessaoToken, sessaoToqueToken: sessaoToqueToken };
@@ -122,6 +132,16 @@ function montarDadosChamadaApi(nome, argumentos) {
       return { email: argumentos[0], codigo: argumentos[1] };
     case 'assumirComandanteComEmailValidado':
       return argumentos[0] || {};
+    case 'enviarCodigoAssumirOficialDia':
+      return { email: argumentos[0] };
+    case 'validarCodigoAssumirOficialDia':
+      return { email: argumentos[0], codigo: argumentos[1] };
+    case 'assumirOficialDiaComEmailValidado':
+      return argumentos[0] || {};
+    case 'enviarCodigoEncerrarOficialDia':
+      return { sessaoToken: sessaoOficialToken };
+    case 'validarCodigoEEncerrarOficialDia':
+      return { email: argumentos[0], codigo: argumentos[1], sessaoToken: sessaoOficialToken };
     case 'enviarCodigoEncerrarComandante':
       return { sessaoToken: sessaoComandanteToken };
     case 'validarCodigoEEncerrarComandante':
@@ -155,6 +175,12 @@ function ajustarRespostaApi(nome, resposta) {
     }
 
     return comandante;
+  }
+
+  if (nome === 'getOficialDiaAtivo') {
+    const oficial = resposta && resposta.oficial ? resposta.oficial : null;
+    if (oficial) oficial.Sessao_Valida = resposta.sessaoValida === true;
+    return oficial;
   }
 
   if (nome === 'getStatusToqueFogo') {
@@ -191,6 +217,11 @@ function ajustarRespostaApi(nome, resposta) {
     resposta.toque.Sessao_Token = resposta.sessaoToken;
   }
 
+  if (nome === 'assumirOficialDiaComEmailValidado' && resposta && resposta.oficial && resposta.sessaoToken) {
+    resposta.oficial.Sessao_Valida = true;
+    resposta.oficial.Sessao_Token = resposta.sessaoToken;
+  }
+
   return resposta;
 }
 
@@ -213,6 +244,7 @@ function criarExecutorAppsScript() {
     'getListasFormulario',
     'getGuardaAtivo',
     'getComandanteAtivo',
+    'getOficialDiaAtivo',
     'getStatusToqueFogo',
     'getPainelComandante',
     'getPessoasDentroGuarda',
@@ -235,6 +267,11 @@ function criarExecutorAppsScript() {
     'enviarCodigoAssumirComandante',
     'validarCodigoAssumirComandante',
     'assumirComandanteComEmailValidado',
+    'enviarCodigoAssumirOficialDia',
+    'validarCodigoAssumirOficialDia',
+    'assumirOficialDiaComEmailValidado',
+    'enviarCodigoEncerrarOficialDia',
+    'validarCodigoEEncerrarOficialDia',
     'enviarCodigoEncerrarComandante',
     'validarCodigoEEncerrarComandante'
   ].forEach(nome => {
@@ -277,6 +314,9 @@ let tipoMovimentacaoAtual = 'Entrada';
   let comandanteAtual = null;
   let emailEncerramentoComandante = null;
   let painelComandanteCarregado = false;
+  let dadosCodigoOficial = null;
+  let oficialAtual = null;
+  let emailEncerramentoOficial = null;
   let pessoasDentroGuardaCarregadas = false;
   let statusToqueFogoAtual = null;
   let dadosCodigoToqueFogo = null;
@@ -288,9 +328,11 @@ let tipoMovimentacaoAtual = 'Entrada';
     alternarTipoRegistro();
     carregarGuardaAtivo();
     carregarComandanteAtivo();
+    carregarOficialDiaAtivo();
     carregarStatusToqueFogo();
     restaurarCodigoGuardaPendente();
     restaurarCodigoComandantePendente();
+    restaurarCodigoOficialPendente();
     aplicarCodigoDoLink();
 
     setInterval(() => {
@@ -300,7 +342,7 @@ let tipoMovimentacaoAtual = 'Entrada';
 
       carregarStatusToqueFogo(true);
 
-      if (aparelhoAssumiuComandanteAtual()) {
+      if (aparelhoAssumiuComandanteAtual() || aparelhoAssumiuOficialAtual()) {
         carregarPainelComandante(true);
       }
     }, 60000);
@@ -668,7 +710,8 @@ let tipoMovimentacaoAtual = 'Entrada';
   function aparelhoPodeConfigurarGuarnicoesServico() {
     return aparelhoAssumiuGuardaAtual() ||
       aparelhoAssumiuToqueAtual() ||
-      aparelhoAssumiuComandanteAtual();
+      aparelhoAssumiuComandanteAtual() ||
+      aparelhoAssumiuOficialAtual();
   }
 
   function definirGuarnicoesServicoRecolhido(recolhido) {
@@ -1285,7 +1328,7 @@ let tipoMovimentacaoAtual = 'Entrada';
         limparFormulario();
         carregarPessoasDentroGuarda(true);
 
-        if (aparelhoAssumiuComandanteAtual()) {
+        if (aparelhoAssumiuComandanteAtual() || aparelhoAssumiuOficialAtual()) {
           carregarPainelComandante(true);
         }
 
@@ -1680,6 +1723,16 @@ function aplicarCodigoDoLink() {
     return;
   }
 
+  if (perfil === 'oficial') {
+    document.getElementById('emailOficial').value = email;
+    document.getElementById('codigoOficial').value = codigo;
+    document.getElementById('areaCodigoOficial').classList.remove('oculto');
+    dadosCodigoOficial = { email: email, militar: null, ticketAssuncao: '' };
+    mostrarMensagem('Código do Oficial de Dia recebido pelo link. Validando...', 'sucesso');
+    setTimeout(() => validarCodigoOficial(), 500);
+    return;
+  }
+
   if (perfil === 'comandante') {
     document.getElementById('emailComandante').value = email;
     document.getElementById('codigoComandante').value = codigo;
@@ -1711,6 +1764,186 @@ function aplicarCodigoDoLink() {
   setTimeout(() => {
     validarCodigoGuarda();
   }, 500);
+}
+
+function carregarOficialDiaAtivo() {
+  google.script.run
+    .withSuccessHandler((oficial) => {
+      oficialAtual = oficial;
+      atualizarTelaOficial();
+    })
+    .withFailureHandler((erro) => mostrarMensagem('Erro ao carregar Oficial de Dia: ' + erro.message, 'erro'))
+    .getOficialDiaAtivo();
+}
+
+function atualizarTelaOficial() {
+  const status = document.getElementById('statusOficial');
+  const areaAssumir = document.getElementById('areaAssumirOficial');
+  const btnEncerrar = document.getElementById('btnEncerrarOficial');
+  const btnTrocar = document.getElementById('btnTrocarOficial');
+  if (!status) return;
+
+  if (oficialAtual) {
+    const local = aparelhoAssumiuOficialAtual();
+    status.classList.add('ativo');
+    status.innerHTML = `Oficial de Dia atual:<br>${oficialAtual.Nome_Oficial} — RG ${oficialAtual.RG_Oficial}`;
+    areaAssumir.classList.add('oculto');
+    btnTrocar.classList.remove('oculto');
+    btnEncerrar.classList.toggle('oculto', !local);
+  } else {
+    status.classList.remove('ativo');
+    status.textContent = 'Nenhum Oficial de Dia ativo. Valide seu e-mail para assumir neste celular.';
+    areaAssumir.classList.remove('oculto');
+    btnTrocar.classList.add('oculto');
+    btnEncerrar.classList.add('oculto');
+    limparOficialLocal();
+  }
+  atualizarVisibilidadePainelComandante();
+  atualizarVisibilidadeGuarnicoesServico();
+}
+
+function mostrarAreaTrocaOficial() {
+  document.getElementById('areaAssumirOficial').classList.remove('oculto');
+  mostrarMensagem('Informe seu e-mail cadastrado para assumir como Oficial de Dia.', 'sucesso');
+}
+
+function enviarCodigoOficial() {
+  const email = document.getElementById('emailOficial').value.trim().toLowerCase();
+  if (!email) return mostrarMensagem('Informe o e-mail do Oficial de Dia.', 'erro');
+  google.script.run
+    .withSuccessHandler((resposta) => {
+      dadosCodigoOficial = { email: resposta.email, militar: null, ticketAssuncao: '' };
+      salvarCodigoOficialPendente(resposta.email);
+      document.getElementById('areaCodigoOficial').classList.remove('oculto');
+      mostrarMensagem('Código enviado ao e-mail do Oficial de Dia.', 'sucesso');
+    })
+    .withFailureHandler((erro) => mostrarMensagem('Erro ao enviar código do Oficial de Dia: ' + erro.message, 'erro'))
+    .enviarCodigoAssumirOficialDia(email);
+}
+
+function validarCodigoOficial() {
+  const email = document.getElementById('emailOficial').value.trim().toLowerCase();
+  const codigo = document.getElementById('codigoOficial').value.trim();
+  if (!email || !codigo) return mostrarMensagem('Informe o e-mail e o código do Oficial de Dia.', 'erro');
+  google.script.run
+    .withSuccessHandler((resposta) => {
+      dadosCodigoOficial = { email: resposta.email, militar: resposta.militar, ticketAssuncao: resposta.ticketAssuncao || '' };
+      limparCodigoOficialPendente();
+      const area = document.getElementById('areaOficialIdentificado');
+      area.innerHTML = `<strong>${resposta.militar.Nome}</strong><br>RG ${resposta.militar.RG}`;
+      area.classList.remove('oculto');
+      document.getElementById('btnAssumirOficial').classList.remove('oculto');
+      mostrarMensagem('Oficial de Dia identificado com sucesso.', 'sucesso');
+    })
+    .withFailureHandler((erro) => mostrarMensagem('Erro ao validar Oficial de Dia: ' + erro.message, 'erro'))
+    .validarCodigoAssumirOficialDia(email, codigo);
+}
+
+function assumirOficial(encerrarAnterior = false) {
+  if (!dadosCodigoOficial || !dadosCodigoOficial.militar) return mostrarMensagem('Valide o e-mail antes de assumir.', 'erro');
+  google.script.run
+    .withSuccessHandler((resposta) => {
+      if (resposta && resposta.requerConfirmacaoTroca && resposta.oficialAtivo) {
+        const atual = resposta.oficialAtivo;
+        abrirModalConfirmacao(
+          'Oficial de Dia já assumido',
+          `Já existe Oficial de Dia ativo:<br><br><strong>${atual.Nome_Oficial} — RG ${atual.RG_Oficial}</strong><br><br>Deseja substituir o Oficial de Dia anterior?`,
+          () => assumirOficial(true), true
+        );
+        return;
+      }
+      oficialAtual = resposta.oficial;
+      salvarOficialLocal(resposta.oficial);
+      limparAreaOficial();
+      atualizarTelaOficial();
+      mostrarMensagem(resposta.mensagem || 'Oficial de Dia assumido com sucesso.', 'sucesso');
+    })
+    .withFailureHandler((erro) => mostrarMensagem('Erro ao assumir como Oficial de Dia: ' + erro.message, 'erro'))
+    .assumirOficialDiaComEmailValidado({
+      email: dadosCodigoOficial.email,
+      militar: dadosCodigoOficial.militar,
+      ticketAssuncao: dadosCodigoOficial.ticketAssuncao || '',
+      encerrarAnterior: encerrarAnterior
+    });
+}
+
+function encerrarOficial() {
+  abrirModalConfirmacao('Encerrar Oficial de Dia', 'Será enviado um código ao e-mail do Oficial de Dia atual. Deseja continuar?', () => {
+    google.script.run
+      .withSuccessHandler((resposta) => {
+        emailEncerramentoOficial = resposta.email;
+        document.getElementById('areaCodigoEncerrarOficial').classList.remove('oculto');
+        mostrarMensagem(resposta.mensagem, 'sucesso');
+      })
+      .withFailureHandler((erro) => mostrarMensagem('Erro ao solicitar encerramento: ' + erro.message, 'erro'))
+      .enviarCodigoEncerrarOficialDia();
+  }, true);
+}
+
+function validarCodigoEEncerrarOficial() {
+  const codigo = document.getElementById('codigoEncerrarOficial').value.trim();
+  if (!emailEncerramentoOficial || !codigo) return mostrarMensagem('Informe o código enviado ao Oficial de Dia.', 'erro');
+  google.script.run
+    .withSuccessHandler((resposta) => {
+      oficialAtual = null;
+      limparOficialLocal();
+      limparAreaOficial();
+      atualizarTelaOficial();
+      mostrarMensagem(resposta.mensagem, 'sucesso');
+    })
+    .withFailureHandler((erro) => mostrarMensagem('Erro ao encerrar Oficial de Dia: ' + erro.message, 'erro'))
+    .validarCodigoEEncerrarOficialDia(emailEncerramentoOficial, codigo);
+}
+
+function limparAreaOficial() {
+  dadosCodigoOficial = null;
+  emailEncerramentoOficial = null;
+  ['emailOficial', 'codigoOficial', 'codigoEncerrarOficial'].forEach(id => {
+    const campo = document.getElementById(id); if (campo) campo.value = '';
+  });
+  ['areaCodigoOficial', 'areaCodigoEncerrarOficial', 'areaOficialIdentificado', 'btnAssumirOficial'].forEach(id => {
+    const item = document.getElementById(id); if (item) item.classList.add('oculto');
+  });
+}
+
+function salvarCodigoOficialPendente(email) {
+  localStorage.setItem('oficial_dia_email_pendente', email);
+  localStorage.setItem('oficial_dia_codigo_pendente_em', new Date().toISOString());
+}
+
+function limparCodigoOficialPendente() {
+  localStorage.removeItem('oficial_dia_email_pendente');
+  localStorage.removeItem('oficial_dia_codigo_pendente_em');
+}
+
+function restaurarCodigoOficialPendente() {
+  const email = localStorage.getItem('oficial_dia_email_pendente');
+  const geradoEm = localStorage.getItem('oficial_dia_codigo_pendente_em');
+  if (!email || !geradoEm || Date.now() - new Date(geradoEm).getTime() > 10 * 60 * 1000) {
+    limparCodigoOficialPendente(); return;
+  }
+  document.getElementById('emailOficial').value = email;
+  document.getElementById('areaCodigoOficial').classList.remove('oculto');
+  dadosCodigoOficial = { email: email, militar: null, ticketAssuncao: '' };
+}
+
+function salvarOficialLocal(oficial) {
+  if (!oficial || !oficial.ID_OficialDia) return;
+  localStorage.setItem('oficial_dia_id_local', oficial.ID_OficialDia);
+  localStorage.setItem('oficial_dia_nome_local', oficial.Nome_Oficial || '');
+  localStorage.setItem('oficial_dia_rg_local', oficial.RG_Oficial || '');
+  if (oficial.Sessao_Token) localStorage.setItem('oficial_dia_sessao_token', oficial.Sessao_Token);
+}
+
+function limparOficialLocal() {
+  ['oficial_dia_id_local', 'oficial_dia_nome_local', 'oficial_dia_rg_local', 'oficial_dia_sessao_token'].forEach(chave => localStorage.removeItem(chave));
+}
+
+function aparelhoAssumiuOficialAtual() {
+  if (!oficialAtual || !oficialAtual.ID_OficialDia) return false;
+  return localStorage.getItem('oficial_dia_id_local') === oficialAtual.ID_OficialDia &&
+    !!localStorage.getItem('oficial_dia_sessao_token') &&
+    oficialAtual.Sessao_Valida !== false;
 }
 
 function carregarComandanteAtivo() {
@@ -1763,7 +1996,7 @@ function atualizarVisibilidadePainelComandante() {
 
   if (!painel) return;
 
-  if (aparelhoAssumiuComandanteAtual()) {
+  if (aparelhoAssumiuComandanteAtual() || aparelhoAssumiuOficialAtual()) {
     painel.classList.remove('oculto');
 
     if (!painelComandanteCarregado) {
@@ -1776,7 +2009,7 @@ function atualizarVisibilidadePainelComandante() {
 }
 
 function carregarPainelComandante(silencioso = false) {
-  if (!aparelhoAssumiuComandanteAtual()) {
+  if (!aparelhoAssumiuComandanteAtual() && !aparelhoAssumiuOficialAtual()) {
     atualizarVisibilidadePainelComandante();
     return;
   }
@@ -2100,7 +2333,7 @@ function registrarSaidaRapidaPessoaGuarda(idMovimentacaoEntrada, botao) {
         atualizadoEm.textContent = 'Atualizado em ' + resposta.atualizadoEm;
       }
 
-      if (aparelhoAssumiuComandanteAtual()) {
+      if (aparelhoAssumiuComandanteAtual() || aparelhoAssumiuOficialAtual()) {
         carregarPainelComandante(true);
       }
     })
