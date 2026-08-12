@@ -691,6 +691,43 @@
     margin-bottom: 14px;
   }
 
+  .card-guarnicoes-servico {
+    margin-bottom: 14px;
+    border-top: 4px solid #7c3aed;
+  }
+
+  .cabecalho-guarnicoes-servico {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .cabecalho-guarnicoes-servico h2 { margin: 0 0 4px; }
+  .cabecalho-guarnicoes-servico span,
+  .descricao-guarnicoes-servico { color: #64748b; font-size: 12px; line-height: 1.4; }
+  .cabecalho-guarnicoes-servico button {
+    flex: 0 0 auto; min-height: 36px; padding: 8px 11px; border: none;
+    border-radius: 10px; background: #7c3aed; color: white; font-size: 12px; font-weight: 700;
+  }
+  .descricao-guarnicoes-servico { margin: 0 0 12px; }
+  .lista-guarnicoes-servico { display: grid; gap: 7px; margin-bottom: 14px; }
+  .resumo-guarnicao-servico {
+    padding: 10px 11px; border: 1px solid #ddd6fe; border-left: 4px solid #7c3aed;
+    border-radius: 10px; background: #f5f3ff; color: #4c1d95; font-size: 12px; line-height: 1.4;
+  }
+  .resumo-guarnicao-servico strong { display: block; margin-bottom: 2px; font-size: 13px; }
+  .editor-guarnicao-servico { padding: 13px; border: 1px solid #ddd6fe; border-radius: 13px; background: #faf5ff; }
+  .editor-guarnicao-servico > label { display: block; margin-bottom: 7px; font-size: 12px; }
+  .campo-motivo-guarnicao { margin-top: 12px; }
+  .opcao-atualizar-guarnicao {
+    display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; padding: 10px;
+    border: 1px solid #ddd6fe; border-radius: 10px; background: #faf5ff;
+    color: #4c1d95; font-size: 12px; line-height: 1.35;
+  }
+  .opcao-atualizar-guarnicao input { flex: 0 0 auto; width: 19px; min-height: 19px; margin: 0; }
+
   .titulo-bloco-viatura > div {
     flex: 1 1 auto;
     min-width: 0;
@@ -1062,3 +1099,4 @@
   line-height: 1.35;
   margin-bottom: 14px;
 }
+
