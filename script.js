@@ -667,6 +667,31 @@ let tipoMovimentacaoAtual = 'Entrada';
       aparelhoAssumiuComandanteAtual();
   }
 
+  function definirGuarnicoesServicoRecolhido(recolhido) {
+    const card = document.getElementById('cardGuarnicoesServico');
+    const conteudo = document.getElementById('conteudoGuarnicoesServico');
+    const botao = document.getElementById('btnAlternarGuarnicoesServico');
+
+    if (!card || !conteudo || !botao) return;
+
+    conteudo.hidden = recolhido;
+    card.classList.toggle('recolhido', recolhido);
+    botao.setAttribute('aria-expanded', recolhido ? 'false' : 'true');
+    localStorage.setItem('guarnicoes_servico_recolhido', recolhido ? 'sim' : 'nao');
+  }
+
+  function alternarGuarnicoesServico() {
+    const conteudo = document.getElementById('conteudoGuarnicoesServico');
+    if (!conteudo) return;
+    definirGuarnicoesServicoRecolhido(!conteudo.hidden);
+  }
+
+  function restaurarEstadoGuarnicoesServico() {
+    definirGuarnicoesServicoRecolhido(
+      localStorage.getItem('guarnicoes_servico_recolhido') === 'sim'
+    );
+  }
+
   function atualizarVisibilidadeGuarnicoesServico() {
     const card = document.getElementById('cardGuarnicoesServico');
     if (!card) return;
@@ -676,8 +701,10 @@ let tipoMovimentacaoAtual = 'Entrada';
     card.classList.toggle('oculto', !podeConfigurar);
 
     if (podeConfigurar && !guarnicoesServicoCarregadas) {
+      restaurarEstadoGuarnicoesServico();
       carregarGuarnicoesServico(true);
     } else if (podeConfigurar && estavaOculto) {
+      restaurarEstadoGuarnicoesServico();
       renderizarEditorGuarnicoesServico();
     }
   }
