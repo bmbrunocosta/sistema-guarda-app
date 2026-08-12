@@ -2480,6 +2480,10 @@ function salvarGuardaLocal(guarda) {
   localStorage.setItem('guarda_nome_local', guarda.Nome_Guarda || '');
   localStorage.setItem('guarda_rg_local', guarda.RG_Guarda || '');
   localStorage.setItem('guarda_email_local', guarda.Email_Guarda || '');
+  localStorage.setItem(
+    'guarda_sessao_token',
+    guarda.Sessao_Token || (typeof URL_API === 'undefined' ? 'apps-script-local' : '')
+  );
 }
 
 function limparGuardaLocal() {
@@ -2487,6 +2491,7 @@ function limparGuardaLocal() {
   localStorage.removeItem('guarda_nome_local');
   localStorage.removeItem('guarda_rg_local');
   localStorage.removeItem('guarda_email_local');
+  localStorage.removeItem('guarda_sessao_token');
 }
 
 function aparelhoAssumiuGuardaAtual() {
@@ -2495,8 +2500,10 @@ function aparelhoAssumiuGuardaAtual() {
   }
 
   const idLocal = localStorage.getItem('guarda_id_local');
+  const tokenLocal = localStorage.getItem('guarda_sessao_token');
+  const sessaoAceita = guardaAtual.Sessao_Valida === undefined || guardaAtual.Sessao_Valida === true;
 
-  return idLocal && idLocal === guardaAtual.ID_GuardaServico;
+  return !!(idLocal && tokenLocal && idLocal === guardaAtual.ID_GuardaServico && sessaoAceita);
 }
 
 function atualizarVisibilidadePessoasDentroGuarda() {
