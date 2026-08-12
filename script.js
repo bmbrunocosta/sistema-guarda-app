@@ -869,7 +869,7 @@ Object.defineProperty(window.google.script, 'run', {
     const contador = document.getElementById('contadorOcupantesViatura');
 
     const quantidade = ocupantesViatura.length;
-    contador.textContent = quantidade === 1 ? '1 pessoa' : `${quantidade} pessoas`;
+    contador.textContent = quantidade === 1 ? '1 adicional' : `${quantidade} adicionais`;
     lista.innerHTML = '';
     lista.classList.toggle('oculto', ocupantesViatura.length === 0);
 
@@ -947,10 +947,6 @@ Object.defineProperty(window.google.script, 'run', {
         return;
       }
 
-      if (ocupantesViatura.length === 0) {
-        mostrarMensagem('Adicione ao menos um ocupante da viatura.', 'erro');
-        return;
-      }
     }
 
     if (tipoRegistro === 'Pessoa cadastrada' && !pessoaSelecionada) {
