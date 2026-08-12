@@ -1144,3 +1144,43 @@
   line-height: 1.35;
   margin-bottom: 14px;
 }
+
+.card-equipe-servico { padding: 0; overflow: hidden; }
+.cabecalho-equipe-servico {
+  width: 100%; border: 0; background: #111827; color: #fff; padding: 13px 15px;
+  display: flex; align-items: center; justify-content: space-between; text-align: left; cursor: pointer;
+}
+.cabecalho-equipe-servico strong, .cabecalho-equipe-servico small { display: block; }
+.cabecalho-equipe-servico strong { font-size: 17px; }
+.cabecalho-equipe-servico small { margin-top: 2px; color: #cbd5e1; font-size: 11px; font-weight: 500; }
+.icone-equipe-servico { font-size: 19px; line-height: 1; }
+.conteudo-equipe-servico { display: grid; }
+.equipe-recolhida .conteudo-equipe-servico { display: none; }
+.perfil-servico {
+  margin: 0 !important; padding: 11px 13px !important; border: 0 !important;
+  border-bottom: 1px solid #e5e7eb !important; border-radius: 0 !important; box-shadow: none !important;
+}
+.perfil-servico:last-child { border-bottom: 0 !important; }
+.perfil-servico .cabecalho-card-guarda { min-height: 28px; gap: 8px; }
+.perfil-servico .cabecalho-card-guarda h2 { font-size: 15px; margin: 0; }
+.perfil-servico .status-guarda {
+  min-height: 0; margin: 4px 0 0; padding: 0; border: 0; background: transparent;
+  font-size: 12px; line-height: 1.3;
+}
+.perfil-servico .periodo-toque-fogo { font-size: 10px; }
+.botao-expandir-perfil {
+  order: 3; width: 30px; min-width: 30px; height: 30px; padding: 0;
+  border: 1px solid #d1d5db; border-radius: 9px; background: #f9fafb;
+  color: #374151; font-size: 17px; line-height: 1;
+}
+.perfil-servico:not(.perfil-expandido) > [id^="areaAssumir"],
+.perfil-servico:not(.perfil-expandido) > [id^="areaCodigo"],
+.perfil-servico:not(.perfil-expandido) > .resultado,
+.perfil-servico:not(.perfil-expandido) > [id^="btnAssumirHora"],
+.perfil-servico:not(.perfil-expandido) > [id^="btnRetomarPosto"] { display: none !important; }
+.perfil-servico.perfil-expandido { padding-bottom: 15px !important; background: #f8fafc; }
+.perfil-servico.perfil-expandido > [id^="areaAssumir"]:not(.oculto),
+.perfil-servico.perfil-expandido > [id^="areaCodigo"]:not(.oculto) { margin-top: 12px; }
+.perfil-servico .acoes-guarda { margin-left: auto; gap: 4px; }
+.perfil-servico .acoes-guarda button { padding: 6px 8px; font-size: 11px; }
+
