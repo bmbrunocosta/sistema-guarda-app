@@ -2289,7 +2289,7 @@ function validarCodigoEEncerrarComandante() {
 
   google.script.run
     .withSuccessHandler((resposta) => {
-      mostrarMensagem(resposta.mensagem || 'Comandante da Guarda encerrado com sucesso.', 'sucesso');
+      mostrarMensagem(resposta.mensagem || 'Comandante da Guarda encerrado. Relatório aguardando as 08h.', 'sucesso');
       comandanteAtual = null;
       emailEncerramentoComandante = null;
       limparComandanteLocal();
