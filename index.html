@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#111827">
     <title>Controle de Acesso - 1º GBM</title>
-  <link rel="stylesheet" href="style.css?v=22.0.1">
+  <link rel="stylesheet" href="style.css?v=22.0.2">
   </head>
 
   <body>
@@ -287,12 +287,18 @@
 
         <section class="card card-guarnicoes-servico oculto" id="cardGuarnicoesServico">
           <div class="cabecalho-guarnicoes-servico">
-            <div>
-              <h2>Guarnições do serviço</h2>
-              <span id="cicloGuarnicoesServico">Ciclo das 08h às 08h</span>
-            </div>
+            <button type="button" id="btnAlternarGuarnicoesServico" class="botao-alternar-guarnicoes-servico"
+              aria-expanded="true" aria-controls="conteudoGuarnicoesServico"
+              onclick="alternarGuarnicoesServico()">
+              <span>
+                <span class="titulo-guarnicoes-servico">Guarnições do serviço</span>
+                <span id="cicloGuarnicoesServico">Ciclo das 08h às 08h</span>
+              </span>
+              <span class="icone-alternar-guarnicoes-servico" aria-hidden="true">⌃</span>
+            </button>
             <button type="button" id="btnAtualizarGuarnicoesServico" onclick="carregarGuarnicoesServico()">Atualizar</button>
           </div>
+          <div id="conteudoGuarnicoesServico">
           <p class="descricao-guarnicoes-servico">
             Defina a composição padrão de cada VTR. No SOS, ela será preenchida automaticamente e ainda poderá ser alterada.
           </p>
@@ -319,6 +325,7 @@
             <button type="button" id="btnSalvarGuarnicaoServico" class="botao-secundario" onclick="salvarGuarnicaoServico()">
               Salvar para o serviço
             </button>
+          </div>
           </div>
         </section>
 
@@ -512,6 +519,6 @@
       </div>
     </div>
 
-  <script src="script.js?v=22.0.1"></script>
+  <script src="script.js?v=22.0.2"></script>
   </body>
 </html>
