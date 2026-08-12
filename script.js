@@ -128,6 +128,7 @@ function montarDadosChamadaApi(nome, argumentos) {
       return {
         email: argumentos[0],
         codigo: argumentos[1],
+        observacoesServico: argumentos[2] || '',
         sessaoToken: sessaoComandanteToken
       };
     default:
@@ -2250,7 +2251,7 @@ function assumirComandante(encerrarAnterior = false) {
 function encerrarComandante() {
   abrirModalConfirmacao(
     'Encerrar Comandante da Guarda',
-    'Será enviado um código para o e-mail do comandante atual.<br><br>Após a confirmação, o relatório das 08h às 08h será criado, arquivado no Drive da Guarda e enviado ao comandante.<br><br>Deseja continuar?',
+    'Será enviado um código para o e-mail do comandante atual. Antes de confirmar, ele poderá registrar as alterações e observações do serviço.<br><br>O PDF só será criado após a validação do código e o encerramento do serviço.<br><br>Deseja continuar?',
     () => enviarCodigoParaEncerrarComandante(),
     true
   );
@@ -2279,6 +2280,7 @@ function enviarCodigoParaEncerrarComandante() {
 
 function validarCodigoEEncerrarComandante() {
   const codigo = document.getElementById('codigoEncerrarComandante').value.trim();
+  const observacoesServico = document.getElementById('observacoesEncerramentoComandante').value.trim();
 
   if (!emailEncerramentoComandante || !codigo) {
     mostrarMensagem('Informe o código enviado ao comandante atual.', 'erro');
@@ -2297,7 +2299,7 @@ function validarCodigoEEncerrarComandante() {
     .withFailureHandler((erro) => {
       mostrarMensagem('Erro ao encerrar comandante: ' + erro.message, 'erro');
     })
-    .validarCodigoEEncerrarComandante(emailEncerramentoComandante, codigo);
+    .validarCodigoEEncerrarComandante(emailEncerramentoComandante, codigo, observacoesServico);
 }
 
 function limparAreaComandante() {
@@ -2308,7 +2310,8 @@ function limparAreaComandante() {
   [
     'emailComandante',
     'codigoComandante',
-    'codigoEncerrarComandante'
+    'codigoEncerrarComandante',
+    'observacoesEncerramentoComandante'
   ].forEach(id => {
     const campo = document.getElementById(id);
     if (campo) campo.value = '';
