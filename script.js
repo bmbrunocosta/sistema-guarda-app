@@ -1379,7 +1379,7 @@ let tipoMovimentacaoAtual = 'Entrada';
       }
 
       if (btnTrocar) {
-        btnTrocar.classList.toggle('oculto', esteAparelhoAssumiu);
+        btnTrocar.classList.remove('oculto');
       }
 
     } else {
@@ -1420,7 +1420,8 @@ let tipoMovimentacaoAtual = 'Entrada';
         dadosCodigoGuarda = {
           email: resposta.email,
           encontradoNoEfetivo: resposta.encontradoNoEfetivo,
-          militar: resposta.militar || null
+          militar: resposta.militar || null,
+          ticketAssuncao: ''
         };
 
         salvarCodigoGuardaPendente(resposta.email);
@@ -1449,7 +1450,8 @@ let tipoMovimentacaoAtual = 'Entrada';
         dadosCodigoGuarda = {
           email: resposta.email,
           encontradoNoEfetivo: resposta.encontradoNoEfetivo,
-          militar: resposta.militar || null
+          militar: resposta.militar || null,
+          ticketAssuncao: resposta.ticketAssuncao || ''
         };
 
         limparCodigoGuardaPendente();
@@ -1500,6 +1502,7 @@ let tipoMovimentacaoAtual = 'Entrada';
       militar: dadosCodigoGuarda.militar,
       rgManual: document.getElementById('rgGuardaManual').value.trim(),
       nomeManual: document.getElementById('nomeGuardaManual').value.trim(),
+      ticketAssuncao: dadosCodigoGuarda.ticketAssuncao || '',
       encerrarAnterior: encerrarAnterior
     };
 
@@ -1657,7 +1660,8 @@ let tipoMovimentacaoAtual = 'Entrada';
     dadosCodigoGuarda = {
       email: email,
       encontradoNoEfetivo: false,
-      militar: null
+      militar: null,
+      ticketAssuncao: ''
     };
 
     mostrarMensagem('Código pendente restaurado. Digite o código recebido por e-mail.', 'sucesso');
@@ -1694,7 +1698,8 @@ function aplicarCodigoDoLink() {
   dadosCodigoGuarda = {
     email: email,
     encontradoNoEfetivo: false,
-    militar: null
+    militar: null,
+    ticketAssuncao: ''
   };
 
   mostrarMensagem('Código recebido pelo link. Validando...', 'sucesso');
