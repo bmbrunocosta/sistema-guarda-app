@@ -577,7 +577,7 @@ let tipoMovimentacaoAtual = 'Entrada';
     const area = document.getElementById('configuracoesViaturasSOS');
     area.innerHTML = '';
 
-    Object.values(selecoesViaturasSOS).forEach(sele…18439 tokens truncated…o PDF ficará pendente e será gerado somente após o fechamento oficial do período.<br><br>Deseja continuar?',
+    Object.values(selecoesViaturasSOS).forEach(sele…18606 tokens truncated…o PDF ficará pendente e será gerado somente após o fechamento oficial do período.<br><br>Deseja continuar?',
     () => enviarCodigoParaEncerrarComandante(),
     true
   );
