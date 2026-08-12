@@ -341,13 +341,13 @@ Object.defineProperty(window.google.script, 'run', {
       ? 'RG/CPF do condutor'
       : 'RG/CPF da pessoa cadastrada';
     document.getElementById('labelPrefixoPlaca').textContent = isViatura
-      ? 'Prefixo/Placa da viatura *'
+      ? 'Prefixo/Placa do Auto/VTR *'
       : 'Prefixo/Placa';
     document.getElementById('prefixoPlaca').placeholder = isViatura
       ? 'Obrigatório'
       : 'Opcional';
     document.getElementById('btnRegistrarMovimentacao').textContent = isViatura
-      ? 'Registrar viatura'
+      ? 'Registrar Auto/VTR'
       : isSOS
         ? 'Registrar saída SOS'
         : 'Registrar';
@@ -984,7 +984,7 @@ Object.defineProperty(window.google.script, 'run', {
       }
 
       if (!dados.prefixoPlaca) {
-        mostrarMensagem('Informe o prefixo ou a placa da viatura.', 'erro');
+        mostrarMensagem('Informe o prefixo ou a placa do Auto/VTR.', 'erro');
         return;
       }
 
@@ -1030,13 +1030,13 @@ Object.defineProperty(window.google.script, 'run', {
         }
 
         botao.disabled = false;
-        botao.textContent = modoRegistroAtual === 'Viatura' ? 'Registrar viatura' : 'Registrar';
+        botao.textContent = modoRegistroAtual === 'Viatura' ? 'Registrar Auto/VTR' : 'Registrar';
       })
       .withFailureHandler((erro) => {
         mostrarMensagem('Erro ao registrar movimentação: ' + erro.message, 'erro');
 
         botao.disabled = false;
-        botao.textContent = modoRegistroAtual === 'Viatura' ? 'Registrar viatura' : 'Registrar';
+        botao.textContent = modoRegistroAtual === 'Viatura' ? 'Registrar Auto/VTR' : 'Registrar';
       })
       .registrarMovimentacao(dados);
   }
