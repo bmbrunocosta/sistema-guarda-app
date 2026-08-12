@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#111827">
     <title>Controle de Acesso - 1º GBM</title>
-  <link rel="stylesheet" href="style.css?v=22.0.8">
+  <link rel="stylesheet" href="style.css?v=23.0.0">
   </head>
 
   <body>
@@ -230,10 +230,49 @@
           </div>
         </section>
 
+        <section class="card card-guarda card-comandante">
+          <div class="cabecalho-card-guarda">
+            <h2>Oficial de Dia</h2>
+            <div class="acoes-guarda">
+              <button type="button" id="btnTrocarOficial" class="botao-trocar oculto" onclick="mostrarAreaTrocaOficial()">Assumir / Trocar</button>
+              <button type="button" id="btnEncerrarOficial" class="botao-sair oculto" onclick="encerrarOficial()">Sair</button>
+            </div>
+          </div>
+
+          <div id="statusOficial" class="status-guarda">Carregando Oficial de Dia...</div>
+          <div id="areaCodigoEncerrarOficial" class="oculto">
+            <div class="campo">
+              <label>Código enviado ao Oficial de Dia atual</label>
+              <input type="text" id="codigoEncerrarOficial" inputmode="numeric" placeholder="Digite o código">
+              <button type="button" onclick="validarCodigoEEncerrarOficial()">Encerrar serviço</button>
+            </div>
+          </div>
+          <div id="areaAssumirOficial">
+            <div class="campo">
+              <label>E-mail do militar</label>
+              <div class="linha-busca">
+                <input type="email" id="emailOficial" placeholder="Digite o e-mail cadastrado">
+                <button type="button" onclick="enviarCodigoOficial()">Enviar</button>
+              </div>
+            </div>
+            <div id="areaCodigoOficial" class="oculto">
+              <div class="campo">
+                <label>Código recebido por e-mail</label>
+                <div class="linha-busca">
+                  <input type="text" id="codigoOficial" inputmode="numeric" placeholder="Digite o código">
+                  <button type="button" onclick="validarCodigoOficial()">Validar</button>
+                </div>
+              </div>
+            </div>
+            <div id="areaOficialIdentificado" class="resultado oculto"></div>
+            <button type="button" id="btnAssumirOficial" class="botao-secundario oculto" onclick="assumirOficial()">Assumir como Oficial de Dia</button>
+          </div>
+        </section>
+
         <section class="card painel-comandante oculto" id="cardPainelComandante">
           <div class="cabecalho-painel-comandante">
             <div>
-              <h2>Painel do Comandante</h2>
+              <h2>Painel de Gestão do Serviço</h2>
               <span id="cicloPainelComandante">Ciclo das 08h às 08h</span>
             </div>
             <button type="button" id="btnAtualizarPainelComandante" onclick="carregarPainelComandante()">
@@ -524,6 +563,6 @@
       </div>
     </div>
 
-  <script src="script.js?v=22.0.8"></script>
+  <script src="script.js?v=23.0.0"></script>
   </body>
 </html>
