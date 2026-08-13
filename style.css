@@ -346,55 +346,47 @@
     margin-top: 20px;
   }
 
-  .secao-painel-comandante h3 {
-    margin: 0;
-    color: #1e293b;
-    font-size: 17px;
-  }
-
   .botao-alternar-secao-painel {
     width: 100%;
     display: flex;
     align-items: center;
-    justify-content: center;
-    min-height: 30px;
-    margin-top: 10px;
-    padding: 4px 0 0;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0;
     border: 0;
-    border-top: 1px solid #cbd5e1;
-    border-radius: 0 0 10px 10px;
-    background: linear-gradient(180deg, rgba(248, 250, 252, 0) 0%, #f8fafc 100%);
+    background: transparent;
+    color: #1e293b;
+    font-size: 17px;
+    font-weight: 700;
+    text-align: left;
     cursor: pointer;
-    transition: border-color 0.2s ease, background 0.2s ease;
-  }
-
-  .botao-alternar-secao-painel:hover,
-  .botao-alternar-secao-painel:focus-visible {
-    border-top-color: #5eead4;
-    background: #f0fdfa;
-    outline: none;
   }
 
   .icone-alternar-secao-painel {
-    width: 30px;
-    height: 22px;
-    flex: 0 0 30px;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    background: #f8fafc;
     color: #475569;
-    font-size: 20px;
+    font-size: 18px;
     line-height: 1;
-    transition: transform 0.2s ease, color 0.2s ease;
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
   }
 
   .botao-alternar-secao-painel[aria-expanded="true"] .icone-alternar-secao-painel {
     transform: rotate(180deg);
+    border-color: #99f6e4;
+    background: #f0fdfa;
     color: #0f766e;
   }
 
   .conteudo-secao-painel {
-    margin-top: 12px;
+    margin-top: 10px;
   }
 
   .conteudo-secao-painel[hidden] {
