@@ -304,6 +304,8 @@ let tipoMovimentacaoAtual = 'Entrada';
   let modoRegistroAtual = 'Individual';
   let categoriaPessoaIndividualAtual = 'Militar';
   let pessoaSelecionada = null;
+  let temporizadorSugestaoPessoa = null;
+  let numeroBuscaPessoa = 0;
   let condutorExternoAtivo = false;
   let ocupantesViatura = [];
   let destinos = [];
@@ -345,6 +347,16 @@ let tipoMovimentacaoAtual = 'Entrada';
     restaurarCodigoComandantePendente();
     restaurarCodigoOficialPendente();
     aplicarCodigoDoLink();
+
+    const campoBuscaPessoa = document.getElementById('rgCpfBusca');
+    campoBuscaPessoa.addEventListener('input', sugerirPessoasEnquantoDigita);
+    campoBuscaPessoa.addEventListener('keydown', evento => {
+      if (evento.key === 'Enter') {
+        evento.preventDefault();
+        clearTimeout(temporizadorSugestaoPessoa);
+        buscarPessoa(false);
+      }
+    });
 
     setInterval(() => {
       if (aparelhoPodeOperarGuardaAtual()) {
@@ -417,8 +429,8 @@ let tipoMovimentacaoAtual = 'Entrada';
     document.getElementById('areaCondutorExterno').classList.toggle('oculto', !isViatura || !condutorExternoAtivo);
     document.getElementById('campoBuscaPessoaPrincipal').classList.toggle('oculto', isViatura && condutorExternoAtivo);
     document.getElementById('labelPessoaPrincipal').textContent = isViatura
-      ? 'RG/CPF do condutor'
-      : 'RG/CPF da pessoa';
+      ? 'Nome ou RG/CPF do condutor'
+      : 'Nome ou RG/CPF da pessoa';
     document.getElementById('labelPrefixoPlaca').textContent = isViatura
       ? 'Prefixo/Placa do Auto/VTR *'
       : 'Prefixo/Placa';
@@ -998,6 +1010,8 @@ let tipoMovimentacaoAtual = 'Entrada';
   }
 
   function selecionarCategoriaPessoa(categoria) {
+    clearTimeout(temporizadorSugestaoPessoa);
+    numeroBuscaPessoa++;
     categoriaPessoaIndividualAtual = ['Colaborador', 'Visitante'].includes(categoria)
       ? categoria
       : 'Militar';
@@ -1014,16 +1028,38 @@ let tipoMovimentacaoAtual = 'Entrada';
     preencherProcedencias();
   }
 
-  function buscarPessoa() {
+  function termoBuscaPessoaValido(termo) {
+    const texto = String(termo || '').trim();
+    const digitos = texto.replace(/\D/g, '');
+    return texto.length >= 2 || digitos.length >= 2;
+  }
+
+  function sugerirPessoasEnquantoDigita() {
+    clearTimeout(temporizadorSugestaoPessoa);
+    numeroBuscaPessoa++;
+    pessoaSelecionada = null;
+    document.getElementById('areaPessoaNaoEncontrada').classList.add('oculto');
+    const resultado = document.getElementById('resultadoPessoa');
+    resultado.innerHTML = '';
+    resultado.classList.add('oculto');
+    const termo = document.getElementById('rgCpfBusca').value.trim();
+    if (!termoBuscaPessoaValido(termo)) return;
+    temporizadorSugestaoPessoa = setTimeout(() => buscarPessoa(true), 350);
+  }
+
+  function buscarPessoa(somenteSugestao = false) {
     const rgCpf = document.getElementById('rgCpfBusca').value.trim();
 
-    if (!rgCpf || rgCpf.replace(/\D/g, '').length < 3) {
-      mostrarMensagem('Digite pelo menos 3 dígitos do RG/CPF.', 'erro');
+    if (!termoBuscaPessoaValido(rgCpf)) {
+      if (!somenteSugestao) mostrarMensagem('Digite pelo menos 2 caracteres do nome ou do RG/CPF.', 'erro');
       return;
     }
 
+    const idBusca = ++numeroBuscaPessoa;
+
     google.script.run
       .withSuccessHandler((pessoas) => {
+        if (idBusca !== numeroBuscaPessoa) return;
         const resultado = document.getElementById('resultadoPessoa');
         resultado.classList.remove('oculto', 'erro');
         resultado.innerHTML = '';
@@ -1038,6 +1074,10 @@ let tipoMovimentacaoAtual = 'Entrada';
         }
 
         if (!pessoas || pessoas.length === 0) {
+          if (somenteSugestao) {
+            resultado.classList.add('oculto');
+            return;
+          }
           resultado.classList.add('erro');
           resultado.textContent = `${categoriaPessoaIndividualAtual} não encontrado(a).`;
           if (modoRegistroAtual === 'Individual') {
@@ -1055,14 +1095,16 @@ let tipoMovimentacaoAtual = 'Entrada';
           const item = document.createElement('button');
           item.type = 'button';
           item.className = 'item-pessoa';
-          item.textContent = `${pessoa.Nome} — ${pessoa.RG_CPF}`;
+          item.textContent = `${pessoa.Nome} — ${pessoa.RG_CPF} • ${pessoa.Tipo_Pessoa}`;
           item.onclick = () => selecionarPessoaEncontrada(pessoa);
 
           resultado.appendChild(item);
         });
       })
       .withFailureHandler((erro) => {
-        mostrarMensagem('Erro ao buscar pessoa: ' + erro.message, 'erro');
+        if (idBusca === numeroBuscaPessoa && !somenteSugestao) {
+          mostrarMensagem('Erro ao buscar pessoa: ' + erro.message, 'erro');
+        }
       })
       .buscarPessoasPorRgCpf(rgCpf, modoRegistroAtual === 'Individual' ? categoriaPessoaIndividualAtual : 'Militar');
   }
@@ -1081,6 +1123,16 @@ let tipoMovimentacaoAtual = 'Entrada';
       document.getElementById('areaCondutorExterno').classList.add('oculto');
       document.getElementById('campoBuscaPessoaPrincipal').classList.remove('oculto');
       document.getElementById('areaOpcaoCondutorExterno').classList.remove('oculto');
+    }
+
+    if (modoRegistroAtual === 'Individual') {
+      const categoriaEncontrada = ['Colaborador', 'Visitante'].includes(pessoa.Tipo_Pessoa)
+        ? pessoa.Tipo_Pessoa
+        : 'Militar';
+      categoriaPessoaIndividualAtual = categoriaEncontrada;
+      document.getElementById('btnCategoriaMilitar').classList.toggle('ativo', categoriaEncontrada === 'Militar');
+      document.getElementById('btnCategoriaColaborador').classList.toggle('ativo', categoriaEncontrada === 'Colaborador');
+      document.getElementById('btnCategoriaVisitante').classList.toggle('ativo', categoriaEncontrada === 'Visitante');
     }
 
     pessoaSelecionada = pessoa;
