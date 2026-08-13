@@ -1978,7 +1978,7 @@ function limparAreaOficial() {
     const iconeEquipe = document.createElement('span');
     iconeEquipe.className = 'icone-equipe-servico';
     iconeEquipe.setAttribute('aria-hidden', 'true');
-    iconeEquipe.textContent = '⌃';
+    iconeEquipe.textContent = '⌄';
     cabecalhoEquipe.appendChild(resumoEquipe);
     cabecalhoEquipe.appendChild(iconeEquipe);
 
@@ -2016,7 +2016,7 @@ function limparAreaOficial() {
       if (botao) {
         const expandido = abrir && item === perfil;
         botao.setAttribute('aria-expanded', String(expandido));
-        botao.textContent = expandido ? '⌃' : '⌄';
+        botao.textContent = '⌄';
       }
     });
   }
@@ -2028,8 +2028,6 @@ function limparAreaOficial() {
     const recolher = !card.classList.contains('equipe-recolhida');
     card.classList.toggle('equipe-recolhida', recolher);
     botao.setAttribute('aria-expanded', String(!recolher));
-    const icone = botao.querySelector('.icone-equipe-servico');
-    if (icone) icone.textContent = recolher ? '⌄' : '⌃';
   }
 function salvarCodigoOficialPendente(email) {
   localStorage.setItem('oficial_dia_email_pendente', email);
