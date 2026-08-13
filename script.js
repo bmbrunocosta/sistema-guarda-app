@@ -2179,7 +2179,7 @@ function renderizarViaturasQuartelPainel(viaturas) {
     const nome = document.createElement('strong');
     nome.textContent = viatura.Prefixo + (viatura.Descricao ? ' — ' + viatura.Descricao : '');
     const status = document.createElement('span');
-    status.textContent = viatura.Situacao_Atual;
+    status.textContent = viatura.Situacao_Atual + (viatura.Categoria ? ' • ' + viatura.Categoria : '');
     cabecalho.appendChild(nome);
     cabecalho.appendChild(status);
     item.appendChild(cabecalho);
