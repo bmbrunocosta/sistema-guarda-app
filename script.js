@@ -2195,7 +2195,6 @@ function atualizarVisibilidadePainelComandante() {
   }
 }
 
-+
 function formatarDataInputLocal(data) {
   const ano = data.getFullYear();
   const mes = String(data.getMonth() + 1).padStart(2, '0');
