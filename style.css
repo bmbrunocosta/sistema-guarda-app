@@ -194,14 +194,25 @@
   }
 
   .icone-alternar-pessoas-dentro {
-    flex: 0 0 auto;
-    font-size: 22px;
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 30px;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 18px;
     line-height: 1;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   }
 
-  .card-pessoas-dentro-guarda.recolhido .icone-alternar-pessoas-dentro {
+  .botao-alternar-pessoas-dentro[aria-expanded="true"] .icone-alternar-pessoas-dentro {
     transform: rotate(180deg);
+    background: #fff1f2;
+    border-color: #fecdd3;
+    color: #be123c;
   }
 
   #btnAtualizarPessoasDentroGuarda {
@@ -472,6 +483,17 @@
     background: #111827;
     color: white;
     border-color: #111827;
+  }
+
+  .categorias-pessoa {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .categorias-pessoa button {
+    min-width: 0;
+    padding-inline: 6px;
+    font-size: clamp(12px, 3.5vw, 15px);
+    white-space: nowrap;
   }
 
   .linha-busca {
@@ -770,15 +792,25 @@
   }
 
   .icone-alternar-guarnicoes-servico {
-    flex: 0 0 auto;
-    color: #1e293b !important;
-    font-size: 22px !important;
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 30px;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #475569 !important;
+    font-size: 18px !important;
     line-height: 1 !important;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   }
 
-  .card-guarnicoes-servico.recolhido .icone-alternar-guarnicoes-servico {
+  .botao-alternar-guarnicoes-servico[aria-expanded="true"] .icone-alternar-guarnicoes-servico {
     transform: rotate(180deg);
+    background: #fff1f2;
+    border-color: #fecdd3;
+    color: #be123c !important;
   }
 
   .card-guarnicoes-servico.recolhido .cabecalho-guarnicoes-servico {
@@ -1255,7 +1287,12 @@
 .cabecalho-equipe-servico strong, .cabecalho-equipe-servico small { display: block; }
 .cabecalho-equipe-servico strong { font-size: 17px; }
 .cabecalho-equipe-servico small { margin-top: 2px; color: #cbd5e1; font-size: 11px; font-weight: 500; }
-.icone-equipe-servico { font-size: 19px; line-height: 1; }
+.icone-equipe-servico {
+  display: inline-grid; place-items: center; flex: 0 0 30px; width: 30px; height: 30px;
+  border: 1px solid rgba(255,255,255,.28); border-radius: 999px; background: rgba(255,255,255,.1);
+  color: #fff; font-size: 18px; line-height: 1; transition: transform .2s ease, background .2s ease;
+}
+.cabecalho-equipe-servico[aria-expanded="true"] .icone-equipe-servico { transform: rotate(180deg); background: rgba(255,255,255,.18); }
 .conteudo-equipe-servico { display: grid; }
 .equipe-recolhida .conteudo-equipe-servico { display: none; }
 .perfil-servico {
@@ -1272,9 +1309,10 @@
 .perfil-servico .periodo-toque-fogo { font-size: 10px; }
 .botao-expandir-perfil {
   order: 3; width: 30px; min-width: 30px; height: 30px; padding: 0;
-  border: 1px solid #d1d5db; border-radius: 9px; background: #f9fafb;
-  color: #374151; font-size: 17px; line-height: 1;
+  display: inline-grid; place-items: center; border: 1px solid #cbd5e1; border-radius: 999px; background: #f8fafc;
+  color: #475569; font-size: 17px; line-height: 1; transition: transform .2s ease, background .2s ease, border-color .2s ease, color .2s ease;
 }
+.botao-expandir-perfil[aria-expanded="true"] { transform: rotate(180deg); background: #fff1f2; border-color: #fecdd3; color: #be123c; }
 .perfil-servico:not(.perfil-expandido) > [id^="areaAssumir"],
 .perfil-servico:not(.perfil-expandido) > [id^="areaCodigo"],
 .perfil-servico:not(.perfil-expandido) > .resultado,
