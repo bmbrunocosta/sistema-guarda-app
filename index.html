@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#111827">
     <title>Controle de Acesso - 1º GBM</title>
-  <link rel="stylesheet" href="style.css?v=23.4.0">
+  <link rel="stylesheet" href="style.css?v=23.5.0">
   </head>
 
   <body>
@@ -421,6 +421,15 @@
 
           <input type="hidden" id="tipoRegistro" value="Pessoa cadastrada">
 
+          <div class="campo" id="areaCategoriaPessoa">
+            <label>Categoria da pessoa</label>
+            <div class="botoes-segmentados">
+              <button type="button" class="ativo" id="btnCategoriaMilitar" onclick="selecionarCategoriaPessoa('Militar')">Militar</button>
+              <button type="button" id="btnCategoriaColaborador" onclick="selecionarCategoriaPessoa('Colaborador')">Colaborador</button>
+              <button type="button" id="btnCategoriaVisitante" onclick="selecionarCategoriaPessoa('Visitante')">Visitante</button>
+            </div>
+          </div>
+
           <div id="areaPessoaCadastrada">
             <div class="campo" id="campoBuscaPessoaPrincipal">
               <label id="labelPessoaPrincipal">RG/CPF da pessoa</label>
@@ -503,7 +512,7 @@
           </div>
 
           <div id="areaPessoaNaoEncontrada" class="oculto">
-            <div class="resultado erro">Pessoa não encontrada. Informe o nome para cadastrá-la automaticamente.</div>
+            <div id="avisoPessoaNaoEncontrada" class="resultado erro">Pessoa não encontrada. Informe o nome para cadastrá-la automaticamente.</div>
             <div class="campo">
               <label>Nome completo</label>
               <input type="text" id="nomePessoaNaoEncontrada" placeholder="Nome completo">
@@ -578,6 +587,6 @@
       </div>
     </div>
 
-  <script src="script.js?v=23.4.0"></script>
+  <script src="script.js?v=23.5.0"></script>
   </body>
 </html>
