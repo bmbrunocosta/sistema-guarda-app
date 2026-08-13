@@ -340,6 +340,7 @@ let tipoMovimentacaoAtual = 'Entrada';
   let movimentacoesGuardaCarregadas = false;
   let statusToqueFogoAtual = null;
   let dadosCodigoToqueFogo = null;
+  let loginToqueFogoAberto = false;
 
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -1582,6 +1583,7 @@ let tipoMovimentacaoAtual = 'Entrada';
 
       if (btnTrocar) {
         btnTrocar.classList.remove('oculto');
+        btnTrocar.textContent = 'Assumir / Trocar';
       }
 
     } else {
@@ -1595,7 +1597,8 @@ let tipoMovimentacaoAtual = 'Entrada';
       }
 
       if (btnTrocar) {
-        btnTrocar.classList.add('oculto');
+        btnTrocar.classList.remove('oculto');
+        btnTrocar.textContent = 'Entrar';
       }
 
       limparGuardaLocal();
@@ -1949,12 +1952,14 @@ function atualizarTelaOficial() {
     status.innerHTML = `Oficial de Dia atual:<br>${oficialAtual.Nome_Oficial} — RG ${oficialAtual.RG_Oficial}`;
     areaAssumir.classList.add('oculto');
     btnTrocar.classList.remove('oculto');
+    btnTrocar.textContent = 'Assumir / Trocar';
     btnEncerrar.classList.toggle('oculto', !local);
   } else {
     status.classList.remove('ativo');
     status.textContent = 'Nenhum Oficial de Dia ativo. Valide seu e-mail para assumir neste celular.';
     areaAssumir.classList.remove('oculto');
-    btnTrocar.classList.add('oculto');
+    btnTrocar.classList.remove('oculto');
+    btnTrocar.textContent = 'Entrar';
     btnEncerrar.classList.add('oculto');
     limparOficialLocal();
   }
@@ -2108,19 +2113,7 @@ function limparAreaOficial() {
     card.appendChild(conteudo);
 
     perfis[0].parentNode.insertBefore(card, perfis[0]);
-    perfis.forEach(perfil => {
-      conteudo.appendChild(perfil);
-      const cabecalho = perfil.querySelector('.cabecalho-card-guarda');
-      if (!cabecalho) return;
-      const botao = document.createElement('button');
-      botao.type = 'button';
-      botao.className = 'botao-expandir-perfil';
-      botao.setAttribute('aria-label', 'Mostrar opções desta função');
-      botao.setAttribute('aria-expanded', 'false');
-      botao.textContent = '⌄';
-      botao.addEventListener('click', () => expandirPerfilServico(perfil.id));
-      cabecalho.appendChild(botao);
-    });
+    perfis.forEach(perfil => conteudo.appendChild(perfil));
 
     card.querySelector('#btnAlternarEquipeServico').addEventListener('click', alternarEquipeServico);
   }
@@ -2131,12 +2124,6 @@ function limparAreaOficial() {
     const abrir = forcarAberto || !perfil.classList.contains('perfil-expandido');
     document.querySelectorAll('.perfil-servico').forEach(item => {
       item.classList.toggle('perfil-expandido', abrir && item === perfil);
-      const botao = item.querySelector('.botao-expandir-perfil');
-      if (botao) {
-        const expandido = abrir && item === perfil;
-        botao.setAttribute('aria-expanded', String(expandido));
-        botao.textContent = '⌄';
-      }
     });
   }
 
@@ -2220,12 +2207,14 @@ function atualizarTelaComandante() {
     areaAssumir.classList.add('oculto');
     btnEncerrar.classList.toggle('oculto', !esteAparelhoAssumiu);
     btnTrocar.classList.toggle('oculto', esteAparelhoAssumiu);
+    btnTrocar.textContent = 'Assumir / Trocar';
   } else {
     status.classList.add('sem-guarda');
     status.textContent = 'Nenhum Comandante da Guarda ativo. Valide seu e-mail para assumir neste celular.';
     areaAssumir.classList.remove('oculto');
     btnEncerrar.classList.add('oculto');
-    btnTrocar.classList.add('oculto');
+    btnTrocar.classList.remove('oculto');
+    btnTrocar.textContent = 'Entrar';
     limparComandanteLocal();
   }
 
@@ -3252,13 +3241,15 @@ function atualizarTelaToqueFogo() {
     statusEl.classList.add('com-guarda');
     statusEl.innerHTML = 'Toque de Fogo atual:<br>' + escaparHtml(toque.Nome_Toque) +
       ' — RG ' + escaparHtml(toque.RG_Toque);
-    areaAssumir.classList.add('oculto');
+    areaAssumir.classList.toggle('oculto', !loginToqueFogoAberto);
     btnTrocar.classList.toggle('oculto', aparelhoAssumiuToqueAtual());
+    btnTrocar.textContent = 'Assumir / Trocar';
   } else {
     statusEl.classList.add('sem-guarda');
     statusEl.textContent = 'Nenhum Toque de Fogo assumiu o período ' + (periodo.faixa || 'atual') + '.';
-    areaAssumir.classList.remove('oculto');
-    btnTrocar.classList.add('oculto');
+    areaAssumir.classList.toggle('oculto', !loginToqueFogoAberto);
+    btnTrocar.classList.remove('oculto');
+    btnTrocar.textContent = 'Entrar';
     limparToqueFogoLocal();
   }
 
@@ -3287,6 +3278,7 @@ function atualizarTelaToqueFogo() {
 }
 
 function mostrarAreaTrocaToqueFogo() {
+  loginToqueFogoAberto = true;
   expandirPerfilServico('cardToqueFogo', true);
   document.getElementById('areaAssumirToqueFogo').classList.remove('oculto');
   mostrarMensagem('Valide o e-mail do militar que assumirá o Toque de Fogo neste período.', 'sucesso');
@@ -3393,6 +3385,7 @@ function assumirToqueFogo(encerrarAnterior = false) {
 
 function limparAreaToqueFogo() {
   dadosCodigoToqueFogo = null;
+  loginToqueFogoAberto = false;
   ['emailToqueFogo', 'codigoToqueFogo', 'rgToqueFogoManual', 'nomeToqueFogoManual'].forEach(id => {
     const campo = document.getElementById(id);
     if (campo) campo.value = '';
