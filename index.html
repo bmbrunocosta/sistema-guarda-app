@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#111827">
     <title>Controle de Acesso - 1º GBM</title>
-  <link rel="stylesheet" href="style.css?v=24.1.0">
+  <link rel="stylesheet" href="style.css?v=24.1.1">
   </head>
 
   <body>
@@ -328,37 +328,37 @@
           </div>
 
           <div class="secao-painel-comandante" id="secaoPainelViaturas">
-            <button type="button" class="botao-alternar-secao-painel" aria-expanded="true" aria-controls="conteudoPainelViaturas" onclick="alternarSecaoPainel('viaturas')">
-              <span>Viaturas do quartel</span>
-              <span class="icone-alternar-secao-painel" aria-hidden="true">⌄</span>
-            </button>
+            <h3>Viaturas do quartel</h3>
             <div id="conteudoPainelViaturas" class="conteudo-secao-painel">
               <div id="listaViaturasQuartel" class="lista-painel"></div>
             </div>
+            <button type="button" class="botao-alternar-secao-painel" aria-label="Expandir ou recolher Viaturas do quartel" aria-expanded="true" aria-controls="conteudoPainelViaturas" onclick="alternarSecaoPainel('viaturas')">
+              <span class="icone-alternar-secao-painel" aria-hidden="true">⌄</span>
+            </button>
           </div>
 
           <div class="secao-painel-comandante" id="secaoPainelDentro">
-            <button type="button" class="botao-alternar-secao-painel" aria-expanded="true" aria-controls="conteudoPainelDentro" onclick="alternarSecaoPainel('dentro')">
-              <span>Dentro do quartel</span>
-              <span class="icone-alternar-secao-painel" aria-hidden="true">⌄</span>
-            </button>
+            <h3>Dentro do quartel</h3>
             <div id="conteudoPainelDentro" class="conteudo-secao-painel">
               <div id="listaPessoasDentro" class="lista-painel">
                 <div class="estado-vazio-painel">Carregando...</div>
               </div>
             </div>
+            <button type="button" class="botao-alternar-secao-painel" aria-label="Expandir ou recolher Dentro do quartel" aria-expanded="true" aria-controls="conteudoPainelDentro" onclick="alternarSecaoPainel('dentro')">
+              <span class="icone-alternar-secao-painel" aria-hidden="true">⌄</span>
+            </button>
           </div>
 
           <div class="secao-painel-comandante" id="secaoPainelMovimentacoes">
-            <button type="button" class="botao-alternar-secao-painel" aria-expanded="false" aria-controls="conteudoPainelMovimentacoes" onclick="alternarSecaoPainel('movimentacoes')">
-              <span>Movimentações das últimas 30h</span>
-              <span class="icone-alternar-secao-painel" aria-hidden="true">⌄</span>
-            </button>
+            <h3>Movimentações das últimas 30h</h3>
             <div id="conteudoPainelMovimentacoes" class="conteudo-secao-painel" hidden>
               <div id="listaMovimentacoesRecentes" class="lista-painel">
                 <div class="estado-vazio-painel">Carregando...</div>
               </div>
             </div>
+            <button type="button" class="botao-alternar-secao-painel" aria-label="Expandir ou recolher Movimentações das últimas 30h" aria-expanded="false" aria-controls="conteudoPainelMovimentacoes" onclick="alternarSecaoPainel('movimentacoes')">
+              <span class="icone-alternar-secao-painel" aria-hidden="true">⌄</span>
+            </button>
           </div>
 
           <div id="atualizadoEmPainelComandante" class="rodape-painel-comandante"></div>
@@ -650,6 +650,6 @@
       </div>
     </div>
 
-  <script src="script.js?v=24.1.0"></script>
+  <script src="script.js?v=24.1.1"></script>
   </body>
 </html>
