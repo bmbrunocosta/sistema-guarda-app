@@ -1393,9 +1393,14 @@
 
 .filtros-historico {
   display: grid;
-  grid-template-columns: minmax(130px, 0.8fr) minmax(130px, 0.8fr) minmax(220px, 1.7fr) minmax(140px, 1fr) minmax(140px, 1fr) auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   align-items: end;
+}
+
+.campo-busca-historico,
+.filtros-historico button {
+  grid-column: 1 / -1;
 }
 
 .filtros-historico .campo {
@@ -1427,17 +1432,6 @@
 .detalhes-historico-secundarios {
   color: #64748b;
   margin-top: 5px;
-}
-
-@media (max-width: 900px) {
-  .filtros-historico {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .campo-busca-historico,
-  .filtros-historico button {
-    grid-column: 1 / -1;
-  }
 }
 
 @media (max-width: 560px) {
