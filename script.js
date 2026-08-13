@@ -356,6 +356,7 @@ let tipoMovimentacaoAtual = 'Entrada';
     restaurarCodigoOficialPendente();
     aplicarCodigoDoLink();
     inicializarFiltrosHistorico();
+    inicializarSecoesPainelComandante();
 
     const campoBuscaPessoa = document.getElementById('rgCpfBusca');
     campoBuscaPessoa.addEventListener('input', sugerirPessoasEnquantoDigita);
@@ -380,6 +381,63 @@ let tipoMovimentacaoAtual = 'Entrada';
       }
     }, 60000);
   });
+
+  const secoesPainelComandante = {
+    viaturas: {
+      secao: 'secaoPainelViaturas',
+      conteudo: 'conteudoPainelViaturas',
+      armazenamento: 'painel_gestao_viaturas_recolhido',
+      recolhidaPorPadrao: false
+    },
+    dentro: {
+      secao: 'secaoPainelDentro',
+      conteudo: 'conteudoPainelDentro',
+      armazenamento: 'painel_gestao_dentro_recolhido',
+      recolhidaPorPadrao: false
+    },
+    movimentacoes: {
+      secao: 'secaoPainelMovimentacoes',
+      conteudo: 'conteudoPainelMovimentacoes',
+      armazenamento: 'painel_gestao_movimentacoes_recolhido',
+      recolhidaPorPadrao: true
+    }
+  };
+
+  function aplicarEstadoSecaoPainel(chave, recolhida, salvar = true) {
+    const configuracao = secoesPainelComandante[chave];
+    if (!configuracao) return;
+
+    const secao = document.getElementById(configuracao.secao);
+    const conteudo = document.getElementById(configuracao.conteudo);
+    const botao = secao?.querySelector('.botao-alternar-secao-painel');
+    if (!secao || !conteudo || !botao) return;
+
+    conteudo.hidden = recolhida;
+    secao.classList.toggle('recolhida', recolhida);
+    botao.setAttribute('aria-expanded', String(!recolhida));
+
+    if (salvar) {
+      localStorage.setItem(configuracao.armazenamento, recolhida ? 'sim' : 'nao');
+    }
+  }
+
+  function alternarSecaoPainel(chave) {
+    const configuracao = secoesPainelComandante[chave];
+    const conteudo = configuracao && document.getElementById(configuracao.conteudo);
+    if (!conteudo) return;
+
+    aplicarEstadoSecaoPainel(chave, !conteudo.hidden);
+  }
+
+  function inicializarSecoesPainelComandante() {
+    Object.entries(secoesPainelComandante).forEach(([chave, configuracao]) => {
+      const estadoSalvo = localStorage.getItem(configuracao.armazenamento);
+      const recolhida = estadoSalvo === null
+        ? configuracao.recolhidaPorPadrao
+        : estadoSalvo === 'sim';
+      aplicarEstadoSecaoPainel(chave, recolhida, false);
+    });
+  }
 
   function selecionarMovimentacao(tipo) {
     tipoMovimentacaoAtual = tipo;
