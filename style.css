@@ -1323,3 +1323,105 @@
 .perfil-servico.perfil-expandido > [id^="areaCodigo"]:not(.oculto) { margin-top: 12px; }
 .perfil-servico .acoes-guarda { margin-left: auto; gap: 4px; }
 .perfil-servico .acoes-guarda button { padding: 6px 8px; font-size: 11px; }
++
+.card-historico {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cabecalho-historico {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.cabecalho-historico h2 {
+  margin: 0 0 4px;
+}
+
+.cabecalho-historico span,
+.resumo-historico {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.link-arquivo-historico {
+  flex: 0 0 auto;
+  color: #1d4ed8;
+  font-weight: 700;
+  text-decoration: none;
+  padding: 8px 10px;
+  border-radius: 9px;
+  background: #eff6ff;
+}
+
+.filtros-historico {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.8fr) minmax(130px, 0.8fr) minmax(220px, 1.7fr) minmax(140px, 1fr) minmax(140px, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.filtros-historico .campo {
+  margin: 0;
+}
+
+.filtros-historico button {
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+.lista-historico {
+  max-height: 620px;
+  overflow-y: auto;
+}
+
+.item-historico {
+  border-left: 4px solid #94a3b8;
+}
+
+.item-historico .movimentacao-entrada {
+  color: #047857;
+}
+
+.item-historico .movimentacao-saida {
+  color: #b91c1c;
+}
+
+.detalhes-historico-secundarios {
+  color: #64748b;
+  margin-top: 5px;
+}
+
+@media (max-width: 900px) {
+  .filtros-historico {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .campo-busca-historico,
+  .filtros-historico button {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .cabecalho-historico {
+    flex-direction: column;
+  }
+
+  .filtros-historico {
+    grid-template-columns: 1fr;
+  }
+
+  .campo-busca-historico,
+  .filtros-historico button {
+    grid-column: auto;
+  }
+
+  .link-arquivo-historico {
+    width: 100%;
+    text-align: center;
+  }
+}
