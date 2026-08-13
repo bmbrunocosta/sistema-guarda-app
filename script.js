@@ -405,14 +405,13 @@ let tipoMovimentacaoAtual = 'Entrada';
     document.getElementById('textoBtnEntrada').textContent = isSOS ? 'Retorno' : 'Entrada';
     document.getElementById('textoBtnSaida').textContent = 'Saída';
 
-    document.getElementById('campoTipoRegistro').classList.toggle('oculto', isViatura);
     document.getElementById('areaOcupantesViatura').classList.toggle('oculto', !isViatura);
     document.getElementById('areaOpcaoCondutorExterno').classList.toggle('oculto', !isViatura || condutorExternoAtivo);
     document.getElementById('areaCondutorExterno').classList.toggle('oculto', !isViatura || !condutorExternoAtivo);
     document.getElementById('campoBuscaPessoaPrincipal').classList.toggle('oculto', isViatura && condutorExternoAtivo);
     document.getElementById('labelPessoaPrincipal').textContent = isViatura
       ? 'RG/CPF do condutor'
-      : 'RG/CPF da pessoa cadastrada';
+      : 'RG/CPF da pessoa';
     document.getElementById('labelPrefixoPlaca').textContent = isViatura
       ? 'Prefixo/Placa do Auto/VTR *'
       : 'Prefixo/Placa';
@@ -431,15 +430,9 @@ let tipoMovimentacaoAtual = 'Entrada';
   }
 
   function alternarTipoRegistro() {
-    if (modoRegistroAtual === 'Viatura') {
-      document.getElementById('tipoRegistro').value = 'Pessoa cadastrada';
-    }
-
-    const tipoRegistro = document.getElementById('tipoRegistro').value;
-    const isCadastrada = tipoRegistro === 'Pessoa cadastrada';
-
-    document.getElementById('areaPessoaCadastrada').classList.toggle('oculto', !isCadastrada);
-    document.getElementById('areaVisitante').classList.toggle('oculto', isCadastrada);
+    document.getElementById('tipoRegistro').value = 'Pessoa cadastrada';
+    document.getElementById('areaPessoaCadastrada').classList.remove('oculto');
+    document.getElementById('areaPessoaNaoEncontrada').classList.add('oculto');
 
     pessoaSelecionada = null;
 
@@ -924,17 +917,15 @@ let tipoMovimentacaoAtual = 'Entrada';
 
   function preencherDestinos() {
     const select = document.getElementById('destino');
-    const tipoRegistro = document.getElementById('tipoRegistro').value;
-    const visitante = tipoRegistro === 'Visitante eventual';
+    const pessoaExterna = pessoaPrincipalEhExterna();
 
     select.innerHTML = '';
 
     const lista = destinos.filter(item => {
       const ativo = String(item.Ativo).toLowerCase() === 'sim';
       const mesmoTipo = item.Tipo_Movimentacao === tipoMovimentacaoAtual;
-      const permitidoVisitante = !visitante || String(item.Permitido_Para_Visitante).toLowerCase() === 'sim';
-
-      return ativo && mesmoTipo && permitidoVisitante;
+      const permitido = !pessoaExterna || String(item.Permitido_Para_Visitante).toLowerCase() === 'sim';
+      return ativo && mesmoTipo && permitido;
     });
 
     lista.sort((a, b) => Number(a.Ordem || 999) - Number(b.Ordem || 999));
@@ -949,17 +940,15 @@ let tipoMovimentacaoAtual = 'Entrada';
 
   function preencherProcedencias() {
     const select = document.getElementById('procedencia');
-    const tipoRegistro = document.getElementById('tipoRegistro').value;
-    const visitante = tipoRegistro === 'Visitante eventual';
+    const pessoaExterna = pessoaPrincipalEhExterna();
 
     select.innerHTML = '';
 
     const lista = procedencias.filter(item => {
       const ativo = String(item.Ativo).toLowerCase() === 'sim';
       const mesmoTipo = item.Tipo_Movimentacao === tipoMovimentacaoAtual;
-      const permitidoVisitante = !visitante || String(item.Permitido_Para_Visitante).toLowerCase() === 'sim';
-
-      return ativo && mesmoTipo && permitidoVisitante;
+      const permitido = !pessoaExterna || String(item.Permitido_Para_Visitante).toLowerCase() === 'sim';
+      return ativo && mesmoTipo && permitido;
     });
 
     lista.sort((a, b) => Number(a.Ordem || 999) - Number(b.Ordem || 999));
@@ -996,6 +985,13 @@ let tipoMovimentacaoAtual = 'Entrada';
     }
   }
 
+  function pessoaPrincipalEhExterna() {
+    if (modoRegistroAtual !== 'Individual') return false;
+    if (!document.getElementById('areaPessoaNaoEncontrada').classList.contains('oculto')) return true;
+    if (!pessoaSelecionada) return false;
+    return String(pessoaSelecionada.Tipo_Pessoa || '').trim().toLowerCase() !== 'militar';
+  }
+
   function buscarPessoa() {
     const rgCpf = document.getElementById('rgCpfBusca').value.trim();
 
@@ -1011,6 +1007,7 @@ let tipoMovimentacaoAtual = 'Entrada';
         resultado.innerHTML = '';
 
         pessoaSelecionada = null;
+        document.getElementById('areaPessoaNaoEncontrada').classList.add('oculto');
 
         if (modoRegistroAtual === 'Viatura') {
           pessoas = (pessoas || []).filter(pessoa => {
@@ -1020,7 +1017,13 @@ let tipoMovimentacaoAtual = 'Entrada';
 
         if (!pessoas || pessoas.length === 0) {
           resultado.classList.add('erro');
-          resultado.textContent = 'Nenhuma pessoa encontrada.';
+          resultado.textContent = 'Pessoa não encontrada.';
+          if (modoRegistroAtual === 'Individual') {
+            document.getElementById('areaPessoaNaoEncontrada').classList.remove('oculto');
+            document.getElementById('nomePessoaNaoEncontrada').focus();
+            preencherDestinos();
+            preencherProcedencias();
+          }
           return;
         }
 
@@ -1057,6 +1060,9 @@ let tipoMovimentacaoAtual = 'Entrada';
     }
 
     pessoaSelecionada = pessoa;
+    document.getElementById('areaPessoaNaoEncontrada').classList.add('oculto');
+    preencherDestinos();
+    preencherProcedencias();
 
     const resultado = document.getElementById('resultadoPessoa');
     resultado.classList.remove('erro');
@@ -1257,7 +1263,10 @@ let tipoMovimentacaoAtual = 'Entrada';
       return;
     }
 
-    const tipoRegistro = document.getElementById('tipoRegistro').value;
+    const cadastroAutomatico = modoRegistroAtual === 'Individual' &&
+      !pessoaSelecionada &&
+      !document.getElementById('areaPessoaNaoEncontrada').classList.contains('oculto');
+    const tipoRegistro = cadastroAutomatico ? 'Pessoa não encontrada' : 'Pessoa cadastrada';
 
     const dados = {
       modoRegistro: modoRegistroAtual,
@@ -1269,8 +1278,8 @@ let tipoMovimentacaoAtual = 'Entrada';
         Nome: document.getElementById('nomeCondutorExterno').value.trim(),
         RG_CPF: document.getElementById('rgCondutorExterno').value.trim()
       } : null,
-      nomeVisitante: document.getElementById('nomeVisitante').value.trim(),
-      rgCpfVisitante: document.getElementById('rgCpfVisitante').value.trim(),
+      nomePessoaNaoEncontrada: document.getElementById('nomePessoaNaoEncontrada').value.trim(),
+      rgCpfPessoaNaoEncontrada: document.getElementById('rgCpfBusca').value.trim(),
       destino: document.getElementById('destino').value,
       procedencia: document.getElementById('procedencia').value,
       complementoProcedencia: document.getElementById('complementoProcedencia').value.trim(),
@@ -1301,20 +1310,13 @@ let tipoMovimentacaoAtual = 'Entrada';
     }
 
     if (tipoRegistro === 'Pessoa cadastrada' && !pessoaSelecionada) {
-      mostrarMensagem('Busque e selecione uma pessoa cadastrada antes de registrar.', 'erro');
+      mostrarMensagem('Busque e selecione uma pessoa antes de registrar.', 'erro');
       return;
     }
 
-    if (tipoRegistro === 'Visitante eventual') {
-      if (!dados.nomeVisitante) {
-        mostrarMensagem('Informe o nome do visitante.', 'erro');
-        return;
-      }
-
-      if (!dados.rgCpfVisitante) {
-        mostrarMensagem('Informe o RG/CPF do visitante.', 'erro');
-        return;
-      }
+    if (tipoRegistro === 'Pessoa não encontrada' && !dados.nomePessoaNaoEncontrada) {
+      mostrarMensagem('Informe o nome completo da pessoa.', 'erro');
+      return;
     }
 
     const areaComplemento = document.getElementById('areaComplementoProcedencia');
@@ -1361,8 +1363,8 @@ let tipoMovimentacaoAtual = 'Entrada';
     document.getElementById('resultadoPessoa').innerHTML = '';
     document.getElementById('resultadoPessoa').classList.add('oculto');
 
-    document.getElementById('nomeVisitante').value = '';
-    document.getElementById('rgCpfVisitante').value = '';
+    document.getElementById('nomePessoaNaoEncontrada').value = '';
+    document.getElementById('areaPessoaNaoEncontrada').classList.add('oculto');
 
     document.getElementById('complementoProcedencia').value = '';
     document.getElementById('prefixoPlaca').value = '';
