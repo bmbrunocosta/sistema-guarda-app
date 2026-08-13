@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#111827">
     <title>Controle de Acesso - 1º GBM</title>
-  <link rel="stylesheet" href="style.css?v=23.5.0">
+  <link rel="stylesheet" href="style.css?v=23.6.0">
   </head>
 
   <body>
@@ -154,7 +154,7 @@
                 <span class="titulo-pessoas-dentro">Pessoas atualmente dentro</span>
                 <span id="resumoPessoasDentroGuarda" class="resumo-pessoas-dentro">Carregando...</span>
               </span>
-              <span id="iconeAlternarPessoasDentroGuarda" class="icone-alternar-pessoas-dentro" aria-hidden="true">⌃</span>
+              <span id="iconeAlternarPessoasDentroGuarda" class="icone-alternar-pessoas-dentro" aria-hidden="true">⌄</span>
             </button>
             <button type="button" id="btnAtualizarPessoasDentroGuarda" onclick="carregarPessoasDentroGuarda()">
               Atualizar
@@ -181,7 +181,7 @@
                 <span class="titulo-pessoas-dentro">Movimentações recentes</span>
                 <span id="resumoMovimentacoesGuarda" class="resumo-pessoas-dentro">Carregando...</span>
               </span>
-              <span class="icone-alternar-pessoas-dentro" aria-hidden="true">⌃</span>
+              <span class="icone-alternar-pessoas-dentro" aria-hidden="true">⌄</span>
             </button>
             <button type="button" id="btnAtualizarMovimentacoesGuarda" class="botao-atualizar-painel-operacional"
               onclick="carregarMovimentacoesGuarda()">Atualizar</button>
@@ -362,7 +362,7 @@
                 <span class="titulo-guarnicoes-servico">Guarnições do serviço</span>
                 <span id="cicloGuarnicoesServico">Ciclo das 08h às 08h</span>
               </span>
-              <span class="icone-alternar-guarnicoes-servico" aria-hidden="true">⌃</span>
+              <span class="icone-alternar-guarnicoes-servico" aria-hidden="true">⌄</span>
             </button>
             <button type="button" id="btnAtualizarGuarnicoesServico" onclick="carregarGuarnicoesServico()">Atualizar</button>
           </div>
@@ -423,7 +423,7 @@
 
           <div class="campo" id="areaCategoriaPessoa">
             <label>Categoria da pessoa</label>
-            <div class="botoes-segmentados">
+            <div class="botoes-segmentados categorias-pessoa">
               <button type="button" class="ativo" id="btnCategoriaMilitar" onclick="selecionarCategoriaPessoa('Militar')">Militar</button>
               <button type="button" id="btnCategoriaColaborador" onclick="selecionarCategoriaPessoa('Colaborador')">Colaborador</button>
               <button type="button" id="btnCategoriaVisitante" onclick="selecionarCategoriaPessoa('Visitante')">Visitante</button>
@@ -587,6 +587,6 @@
       </div>
     </div>
 
-  <script src="script.js?v=23.5.0"></script>
+  <script src="script.js?v=23.6.0"></script>
   </body>
 </html>
