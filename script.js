@@ -73,6 +73,8 @@ function montarDadosChamadaApi(nome, argumentos) {
       return { sessaoToken: sessaoComandanteToken, sessaoOficialToken: sessaoOficialToken };
     case 'getPessoasDentroGuarda':
       return { sessaoToken: sessaoToken, sessaoToqueToken: sessaoToqueToken };
+    case 'getMovimentacoesRecentesGuarda':
+      return { sessaoToken: sessaoToken, sessaoToqueToken: sessaoToqueToken };
     case 'registrarSaidaRapidaPessoa':
       return { idMovimentacaoEntrada: argumentos[0], sessaoToken: sessaoToken, sessaoToqueToken: sessaoToqueToken };
     case 'getDadosSOS':
@@ -248,6 +250,7 @@ function criarExecutorAppsScript() {
     'getStatusToqueFogo',
     'getPainelComandante',
     'getPessoasDentroGuarda',
+    'getMovimentacoesRecentesGuarda',
     'registrarSaidaRapidaPessoa',
     'getDadosSOS',
     'salvarGuarnicoesServico',
@@ -318,6 +321,7 @@ let tipoMovimentacaoAtual = 'Entrada';
   let oficialAtual = null;
   let emailEncerramentoOficial = null;
   let pessoasDentroGuardaCarregadas = false;
+  let movimentacoesGuardaCarregadas = false;
   let statusToqueFogoAtual = null;
   let dadosCodigoToqueFogo = null;
 
@@ -339,6 +343,7 @@ let tipoMovimentacaoAtual = 'Entrada';
     setInterval(() => {
       if (aparelhoPodeOperarGuardaAtual()) {
         carregarPessoasDentroGuarda(true);
+        carregarMovimentacoesGuarda(true);
       }
 
       carregarStatusToqueFogo(true);
@@ -691,6 +696,7 @@ let tipoMovimentacaoAtual = 'Entrada';
         renderizarSelecaoViaturasSOS();
         renderizarEditorGuarnicoesServico();
         carregarPessoasDentroGuarda(true);
+        carregarMovimentacoesGuarda(true);
         carregarPainelComandante(true);
         carregarStatusToqueFogo(true);
         botao.disabled = false;
@@ -1328,6 +1334,7 @@ let tipoMovimentacaoAtual = 'Entrada';
         mostrarMensagem(resposta.mensagem || 'Movimentação registrada com sucesso.', 'sucesso');
         limparFormulario();
         carregarPessoasDentroGuarda(true);
+        carregarMovimentacoesGuarda(true);
 
         if (aparelhoAssumiuComandanteAtual() || aparelhoAssumiuOficialAtual()) {
           carregarPainelComandante(true);
@@ -2218,8 +2225,9 @@ function renderizarListaPessoasDentro(pessoas) {
   });
 }
 
-function renderizarListaMovimentacoesRecentes(movimentacoes) {
-  const lista = document.getElementById('listaMovimentacoesRecentes');
+function renderizarListaMovimentacoesRecentes(movimentacoes, idLista = 'listaMovimentacoesRecentes') {
+  const lista = document.getElementById(idLista);
+  if (!lista) return;
   lista.innerHTML = '';
 
   if (!movimentacoes.length) {
@@ -2436,6 +2444,7 @@ function registrarSaidaRapidaPessoaGuarda(idMovimentacaoEntrada, botao) {
       }
 
       carregarPessoasDentroGuarda(true);
+      carregarMovimentacoesGuarda(true);
     })
     .registrarSaidaRapidaPessoa(idMovimentacaoEntrada);
 }
@@ -2814,6 +2823,73 @@ function salvarGuardaLocal(guarda) {
   );
 }
 
+function carregarMovimentacoesGuarda(silencioso = false) {
+  if (!aparelhoPodeOperarGuardaAtual()) {
+    atualizarVisibilidadeMovimentacoesGuarda();
+    return;
+  }
+
+  const botao = document.getElementById('btnAtualizarMovimentacoesGuarda');
+  if (botao) {
+    botao.disabled = true;
+    botao.textContent = 'Atualizando...';
+  }
+
+  google.script.run
+    .withSuccessHandler((resposta) => {
+      const movimentacoes = resposta && resposta.movimentacoes ? resposta.movimentacoes : [];
+      renderizarListaMovimentacoesRecentes(movimentacoes, 'listaMovimentacoesGuarda');
+      movimentacoesGuardaCarregadas = true;
+
+      const total = Number(resposta && resposta.total || 0);
+      const resumo = document.getElementById('resumoMovimentacoesGuarda');
+      if (resumo) resumo.textContent = total === 1 ? '1 registro no ciclo' : total + ' registros no ciclo';
+
+      const ciclo = document.getElementById('cicloMovimentacoesGuarda');
+      if (ciclo && resposta && resposta.cicloInicio && resposta.cicloFim) {
+        ciclo.textContent = 'Ciclo: ' + resposta.cicloInicio + ' até ' + resposta.cicloFim + '. Exibindo os 30 registros mais recentes.';
+      }
+
+      const atualizado = document.getElementById('atualizadoEmMovimentacoesGuarda');
+      if (atualizado) atualizado.textContent = resposta && resposta.atualizadoEm ? 'Atualizado em ' + resposta.atualizadoEm : '';
+      if (botao) {
+        botao.disabled = false;
+        botao.textContent = 'Atualizar';
+      }
+    })
+    .withFailureHandler((erro) => {
+      if (!silencioso) mostrarMensagem('Erro ao carregar movimentações: ' + erro.message, 'erro');
+      if (botao) {
+        botao.disabled = false;
+        botao.textContent = 'Atualizar';
+      }
+    })
+    .getMovimentacoesRecentesGuarda();
+}
+
+function definirMovimentacoesGuardaRecolhido(recolhido) {
+  const card = document.getElementById('cardMovimentacoesGuarda');
+  const conteudo = document.getElementById('conteudoMovimentacoesGuarda');
+  const botao = document.getElementById('btnAlternarMovimentacoesGuarda');
+  if (!card || !conteudo || !botao) return;
+  conteudo.hidden = recolhido;
+  card.classList.toggle('recolhido', recolhido);
+  botao.setAttribute('aria-expanded', recolhido ? 'false' : 'true');
+  localStorage.setItem('movimentacoes_guarda_recolhido', recolhido ? 'sim' : 'nao');
+}
+
+function alternarMovimentacoesGuarda() {
+  const conteudo = document.getElementById('conteudoMovimentacoesGuarda');
+  if (!conteudo) return;
+  definirMovimentacoesGuardaRecolhido(!conteudo.hidden);
+}
+
+function restaurarEstadoMovimentacoesGuarda() {
+  definirMovimentacoesGuardaRecolhido(
+    localStorage.getItem('movimentacoes_guarda_recolhido') !== 'nao'
+  );
+}
+
 function limparGuardaLocal() {
   localStorage.removeItem('guarda_id_local');
   localStorage.removeItem('guarda_nome_local');
@@ -2862,6 +2938,19 @@ function carregarStatusToqueFogo(silencioso = false) {
       if (!silencioso) mostrarMensagem('Erro ao carregar Toque de Fogo: ' + erro.message, 'erro');
     })
     .getStatusToqueFogo();
+}
+
+function atualizarVisibilidadeMovimentacoesGuarda() {
+  const card = document.getElementById('cardMovimentacoesGuarda');
+  if (!card) return;
+  if (aparelhoPodeOperarGuardaAtual()) {
+    card.classList.remove('oculto');
+    restaurarEstadoMovimentacoesGuarda();
+    if (!movimentacoesGuardaCarregadas) carregarMovimentacoesGuarda(true);
+  } else {
+    card.classList.add('oculto');
+    movimentacoesGuardaCarregadas = false;
+  }
 }
 
 function atualizarTelaToqueFogo() {
@@ -3119,6 +3208,7 @@ function atualizarPermissaoLancamento() {
   const podeLancar = guardaAtual && aparelhoPodeOperarGuardaAtual();
 
   atualizarVisibilidadePessoasDentroGuarda();
+  atualizarVisibilidadeMovimentacoesGuarda();
   atualizarVisibilidadeGuarnicoesServico();
 
   if (podeLancar) {
