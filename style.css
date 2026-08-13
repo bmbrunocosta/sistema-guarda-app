@@ -155,6 +155,29 @@
     border-top-color: #2563eb;
   }
 
+  .card-pessoas-dentro-guarda::after,
+  .card-guarnicoes-servico::after {
+    content: '';
+    display: block;
+    width: 54px;
+    height: 3px;
+    margin: 12px auto -8px;
+    border-radius: 999px;
+    background: #86efac;
+  }
+
+  .card-movimentacoes-guarda::after {
+    background: #93c5fd;
+  }
+
+  .card-guarnicoes-servico::after {
+    background: #c4b5fd;
+  }
+
+  .card-pessoas-dentro-guarda.recolhido .cabecalho-pessoas-dentro-guarda {
+    margin-bottom: 0;
+  }
+
   .cabecalho-pessoas-dentro-guarda {
     display: flex;
     align-items: center;
@@ -1321,6 +1344,15 @@
   margin-bottom: 14px;
 }
 .card-equipe-servico { padding: 0; overflow: hidden; }
+.card-equipe-servico::after {
+  content: '';
+  display: block;
+  width: 54px;
+  height: 3px;
+  margin: 9px auto;
+  border-radius: 999px;
+  background: #94a3b8;
+}
 .cabecalho-equipe-servico {
   width: 100%; border: 0; background: #111827; color: #fff; padding: 13px 15px;
   display: flex; align-items: center; justify-content: space-between; text-align: left; cursor: pointer;
