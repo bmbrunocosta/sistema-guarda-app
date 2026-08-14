@@ -1987,7 +1987,12 @@ function atualizarTelaOficial() {
   }
 
   const comandantePodeEditar = aparelhoAssumiuComandanteAtual();
-  if (btnEditar) btnEditar.classList.toggle('oculto', !comandantePodeEditar);
+  if (btnEditar) {
+    btnEditar.classList.remove('oculto');
+    btnEditar.title = comandantePodeEditar
+      ? 'Informar ou alterar o Oficial de Dia'
+      : 'Entre como Comandante da Guarda neste aparelho para informar o Oficial de Dia';
+  }
   if (!comandantePodeEditar && areaDesignar) areaDesignar.classList.add('oculto');
 
   atualizarTelaAcessoOficial();
@@ -1997,7 +2002,14 @@ function atualizarTelaOficial() {
 
 function mostrarDesignacaoOficialDia() {
   if (!aparelhoAssumiuComandanteAtual()) {
-    mostrarMensagem('Somente o Comandante da Guarda pode informar o Oficial de Dia.', 'erro');
+    expandirPerfilServico('perfilComandante', true);
+    mostrarAreaTrocaComandante();
+    mostrarMensagem(
+      'Para informar o Oficial de Dia neste aparelho, valide o e-mail do Comandante da Guarda.',
+      'sucesso'
+    );
+    const campoEmailComandante = document.getElementById('emailComandante');
+    if (campoEmailComandante) campoEmailComandante.focus();
     return;
   }
   expandirPerfilServico('perfilOficial', true);
