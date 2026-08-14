@@ -2437,6 +2437,17 @@ function formatarDataInputLocal(data) {
   return `${ano}-${mes}-${dia}`;
 }
 
+function alternarConsultaHistorico() {
+  const conteudo = document.getElementById('conteudoConsultaHistorico');
+  const botao = document.getElementById('btnAlternarConsultaHistorico');
+  if (!conteudo || !botao) return;
+
+  const abrir = conteudo.classList.contains('oculto');
+  conteudo.classList.toggle('oculto', !abrir);
+  botao.setAttribute('aria-expanded', String(abrir));
+  botao.setAttribute('aria-label', (abrir ? 'Recolher' : 'Expandir') + ' Consultar histórico');
+}
+
 function inicializarFiltrosHistorico() {
   if (historicoInicializado) return;
   const inicio = document.getElementById('historicoDataInicio');
