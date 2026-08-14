@@ -1353,6 +1353,54 @@
   border-radius: 999px;
   background: #94a3b8;
 }
+
+.card-consulta-efetivo {
+  border-top: 4px solid #0f766e;
+}
+
+.cabecalho-consulta-efetivo,
+.cabecalho-lista-consulta {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cabecalho-consulta-efetivo h2 { margin: 0; }
+
+.cabecalho-consulta-efetivo p {
+  margin: 5px 0 14px;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.area-codigo-consulta {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.cabecalho-lista-consulta {
+  margin-bottom: 8px;
+}
+
+.cabecalho-lista-consulta > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cabecalho-lista-consulta span {
+  color: #64748b;
+  font-size: 12px;
+}
+
+@media (max-width: 520px) {
+  .cabecalho-consulta-efetivo { align-items: center; }
+  .card-consulta-efetivo .linha-busca { align-items: stretch; }
+}
 .cabecalho-equipe-servico {
   width: 100%; border: 0; background: #111827; color: #fff; padding: 13px 15px;
   display: flex; align-items: center; justify-content: space-between; text-align: left; cursor: pointer;
