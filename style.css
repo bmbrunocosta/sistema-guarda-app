@@ -1577,6 +1577,61 @@
 .cabecalho-acesso-oficial span {
   display: block;
 }
+/* Chevron geométrico e consistente em todos os navegadores */
+.icone-alternar-pessoas-dentro,
+.icone-alternar-secao-painel,
+.icone-alternar-guarnicoes-servico,
+.icone-equipe-servico {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  padding: 0;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  transform: none !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  transition: background-color .2s ease, border-color .2s ease, color .2s ease, box-shadow .2s ease;
+}
+
+.icone-alternar-pessoas-dentro::before,
+.icone-alternar-secao-painel::before,
+.icone-alternar-guarnicoes-servico::before,
+.icone-equipe-servico::before {
+  content: '';
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  transform-origin: center;
+  transition: transform .2s ease;
+}
+
+.botao-alternar-pessoas-dentro[aria-expanded="true"] .icone-alternar-pessoas-dentro,
+.botao-alternar-secao-painel[aria-expanded="true"] .icone-alternar-secao-painel,
+.botao-alternar-guarnicoes-servico[aria-expanded="true"] .icone-alternar-guarnicoes-servico,
+.cabecalho-equipe-servico[aria-expanded="true"] .icone-equipe-servico {
+  transform: none !important;
+}
+
+.botao-alternar-pessoas-dentro[aria-expanded="true"] .icone-alternar-pessoas-dentro::before,
+.botao-alternar-secao-painel[aria-expanded="true"] .icone-alternar-secao-painel::before,
+.botao-alternar-guarnicoes-servico[aria-expanded="true"] .icone-alternar-guarnicoes-servico::before,
+.cabecalho-equipe-servico[aria-expanded="true"] .icone-equipe-servico::before {
+  transform: translateY(2px) rotate(225deg);
+}
+
+.botao-alternar-pessoas-dentro:focus-visible .icone-alternar-pessoas-dentro,
+.botao-alternar-secao-painel:focus-visible .icone-alternar-secao-painel,
+.botao-alternar-guarnicoes-servico:focus-visible .icone-alternar-guarnicoes-servico,
+.cabecalho-equipe-servico:focus-visible .icone-equipe-servico {
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.18);
+}
+
 
 .cabecalho-acesso-oficial span {
   margin-top: 3px;
