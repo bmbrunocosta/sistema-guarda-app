@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#111827">
     <title>Controle de Acesso - 1º GBM</title>
-  <link rel="stylesheet" href="style.css?v=24.6.6">
+  <link rel="stylesheet" href="style.css?v=24.7.0">
   </head>
 
   <body>
@@ -430,46 +430,54 @@
               <h2>Consultar histórico</h2>
               <span>Pesquise movimentações antigas sem depender dos PDFs.</span>
             </div>
+            <button type="button" id="btnAlternarConsultaHistorico" class="botao-alternar-historico"
+              aria-label="Expandir Consultar histórico" aria-expanded="false" aria-controls="conteudoConsultaHistorico"
+              onclick="alternarConsultaHistorico()">
+              <span class="icone-alternar-secao-painel" aria-hidden="true"></span>
+            </button>
+          </div>
+
+          <div id="conteudoConsultaHistorico" class="conteudo-consulta-historico oculto">
             <a id="linkArquivoHistorico" class="link-arquivo-historico oculto" href="#" target="_blank" rel="noopener">
               Abrir arquivo anual
             </a>
-          </div>
 
-          <div class="filtros-historico">
-            <div class="campo">
-              <label for="historicoDataInicio">De</label>
-              <input type="date" id="historicoDataInicio">
+            <div class="filtros-historico">
+              <div class="campo">
+                <label for="historicoDataInicio">De</label>
+                <input type="date" id="historicoDataInicio">
+              </div>
+              <div class="campo">
+                <label for="historicoDataFim">Até</label>
+                <input type="date" id="historicoDataFim">
+              </div>
+              <div class="campo campo-busca-historico">
+                <label for="historicoTermo">Pessoa, RG/CPF, Auto/VTR ou local</label>
+                <input type="search" id="historicoTermo" placeholder="Digite para filtrar">
+              </div>
+              <div class="campo">
+                <label for="historicoTipo">Movimentação</label>
+                <select id="historicoTipo">
+                  <option value="">Todas</option>
+                  <option value="Entrada">Entrada</option>
+                  <option value="Saída">Saída</option>
+                </select>
+              </div>
+              <div class="campo">
+                <label for="historicoCategoria">Categoria</label>
+                <select id="historicoCategoria">
+                  <option value="">Todas</option>
+                  <option value="Militar">Militar</option>
+                  <option value="Colaborador">Colaborador</option>
+                  <option value="Visitante">Visitante</option>
+                </select>
+              </div>
+              <button type="button" id="btnConsultarHistorico" class="botao-pesquisar-historico" onclick="consultarHistorico()">Pesquisar</button>
             </div>
-            <div class="campo">
-              <label for="historicoDataFim">Até</label>
-              <input type="date" id="historicoDataFim">
-            </div>
-            <div class="campo campo-busca-historico">
-              <label for="historicoTermo">Pessoa, RG/CPF, Auto/VTR ou local</label>
-              <input type="search" id="historicoTermo" placeholder="Digite para filtrar">
-            </div>
-            <div class="campo">
-              <label for="historicoTipo">Movimentação</label>
-              <select id="historicoTipo">
-                <option value="">Todas</option>
-                <option value="Entrada">Entrada</option>
-                <option value="Saída">Saída</option>
-              </select>
-            </div>
-            <div class="campo">
-              <label for="historicoCategoria">Categoria</label>
-              <select id="historicoCategoria">
-                <option value="">Todas</option>
-                <option value="Militar">Militar</option>
-                <option value="Colaborador">Colaborador</option>
-                <option value="Visitante">Visitante</option>
-              </select>
-            </div>
-            <button type="button" id="btnConsultarHistorico" onclick="consultarHistorico()">Pesquisar</button>
-          </div>
 
-          <div id="resumoHistorico" class="resumo-historico">Informe o período e toque em Pesquisar.</div>
-          <div id="listaHistorico" class="lista-painel lista-historico"></div>
+            <div id="resumoHistorico" class="resumo-historico">Informe o período e toque em Pesquisar.</div>
+            <div id="listaHistorico" class="lista-painel lista-historico"></div>
+          </div>
         </section>
 
         <div id="avisoSemPermissaoLancamento" class="aviso-bloqueio oculto">
@@ -710,6 +718,6 @@
       </div>
     </div>
 
-  <script src="app.js?v=24.6.6"></script>
+  <script src="app.js?v=24.7.0"></script>
   </body>
 </html>
