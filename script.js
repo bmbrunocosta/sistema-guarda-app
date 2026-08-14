@@ -1,7 +1,3 @@
-Exit code: 0
-Wall time: 0.6 seconds
-Total output lines: 3537
-Output:
 const URL_API = 'https://script.google.com/macros/s/AKfycbwqSpqWQOjFcOfSClEGTesKZAGPnuMaKQiIIu9RYChC5yFX6gwXpwFg1f5DpvbNHy5j/exec';
 const parametrosUrl = new URLSearchParams(window.location.search);
 
