@@ -52,6 +52,10 @@ function obterSessaoTokenOficialLocal() {
   return localStorage.getItem('oficial_dia_sessao_token') || '';
 }
 
+function obterSessaoTokenConsultaEfetivoLocal() {
+  return localStorage.getItem('consulta_efetivo_sessao_token') || '';
+}
+
 function montarDadosChamadaApi(nome, argumentos) {
   const sessaoToken = obterSessaoTokenLocal();
   const sessaoComandanteToken = obterSessaoTokenComandanteLocal();
@@ -81,6 +85,12 @@ function montarDadosChamadaApi(nome, argumentos) {
       return { sessaoToken: sessaoToken, sessaoToqueToken: sessaoToqueToken };
     case 'getMovimentacoesRecentesGuarda':
       return { sessaoToken: sessaoToken, sessaoToqueToken: sessaoToqueToken };
+    case 'enviarCodigoConsultaEfetivo':
+      return { email: argumentos[0] };
+    case 'validarCodigoConsultaEfetivo':
+      return { email: argumentos[0], codigo: argumentos[1] };
+    case 'getMovimentacoesConsultaEfetivo':
+      return { sessaoToken: obterSessaoTokenConsultaEfetivoLocal() };
     case 'registrarSaidaRapidaPessoa':
       return { idMovimentacaoEntrada: argumentos[0], sessaoToken: sessaoToken, sessaoToqueToken: sessaoToqueToken };
     case 'getDadosSOS':
@@ -263,6 +273,9 @@ function criarExecutorAppsScript() {
     'consultarHistoricoMovimentacoes',
     'getPessoasDentroGuarda',
     'getMovimentacoesRecentesGuarda',
+    'enviarCodigoConsultaEfetivo',
+    'validarCodigoConsultaEfetivo',
+    'getMovimentacoesConsultaEfetivo',
     'registrarSaidaRapidaPessoa',
     'getDadosSOS',
     'salvarGuarnicoesServico',
@@ -339,8 +352,9 @@ let tipoMovimentacaoAtual = 'Entrada';
   let pessoasDentroGuardaCarregadas = false;
   let movimentacoesGuardaCarregadas = false;
   let statusToqueFogoAtual = null;
-  let dadosCodigoToqueFogo = null;
-  let loginToqueFogoAberto = false;
+let dadosCodigoToqueFogo = null;
+let loginToqueFogoAberto = false;
+let consultaEfetivoAtual = null;
 
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -357,7 +371,8 @@ let tipoMovimentacaoAtual = 'Entrada';
     restaurarCodigoOficialPendente();
     aplicarCodigoDoLink();
     inicializarFiltrosHistorico();
-    inicializarSecoesPainelComandante();
+  inicializarSecoesPainelComandante();
+  restaurarConsultaEfetivo();
 
     const campoBuscaPessoa = document.getElementById('rgCpfBusca');
     campoBuscaPessoa.addEventListener('input', sugerirPessoasEnquantoDigita);
@@ -377,9 +392,11 @@ let tipoMovimentacaoAtual = 'Entrada';
 
       carregarStatusToqueFogo(true);
 
-      if (aparelhoAssumiuComandanteAtual() || aparelhoAssumiuOficialAtual()) {
-        carregarPainelComandante(true);
-      }
+    if (aparelhoAssumiuComandanteAtual() || aparelhoAssumiuOficialAtual()) {
+      carregarPainelComandante(true);
+    }
+
+    if (obterSessaoConsultaEfetivo()) carregarMovimentacoesConsultaEfetivo(true);
     }, 60000);
   });
 
@@ -1883,6 +1900,15 @@ function aplicarCodigoDoLink() {
     return;
   }
 
+  if (perfil === 'consulta') {
+    document.getElementById('emailConsultaEfetivo').value = email;
+    document.getElementById('codigoConsultaEfetivo').value = codigo;
+    document.getElementById('areaCodigoConsultaEfetivo').classList.remove('oculto');
+    mostrarMensagem('Código da consulta recebido pelo link. Validando...', 'sucesso');
+    setTimeout(() => validarCodigoConsultaEfetivo(), 500);
+    return;
+  }
+
   if (perfil === 'oficial') {
     expandirPerfilServico('perfilOficial', true);
     document.getElementById('emailOficial').value = email;
@@ -2503,7 +2529,7 @@ function renderizarListaMovimentacoesRecentes(movimentacoes, idLista = 'listaMov
   lista.innerHTML = '';
 
   if (!movimentacoes.length) {
-    lista.appendChild(criarEstadoVazioPainel('Nenhuma movimentação registrada neste ciclo.'));
+    lista.appendChild(criarEstadoVazioPainel('Nenhuma movimentação registrada no período.'));
     return;
   }
 
@@ -3149,11 +3175,11 @@ function carregarMovimentacoesGuarda(silencioso = false) {
 
       const total = Number(resposta && resposta.total || 0);
       const resumo = document.getElementById('resumoMovimentacoesGuarda');
-      if (resumo) resumo.textContent = total === 1 ? '1 registro no ciclo' : total + ' registros no ciclo';
+      if (resumo) resumo.textContent = total === 1 ? '1 registro nas últimas 24h' : total + ' registros nas últimas 24h';
 
       const ciclo = document.getElementById('cicloMovimentacoesGuarda');
-      if (ciclo && resposta && resposta.cicloInicio && resposta.cicloFim) {
-        ciclo.textContent = 'Ciclo: ' + resposta.cicloInicio + ' até ' + resposta.cicloFim + '. Exibindo os 30 registros mais recentes.';
+      if (ciclo && resposta && resposta.periodoInicio && resposta.periodoFim) {
+        ciclo.textContent = 'Período: ' + resposta.periodoInicio + ' até ' + resposta.periodoFim + '.';
       }
 
       const atualizado = document.getElementById('atualizadoEmMovimentacoesGuarda');
@@ -3172,6 +3198,140 @@ function carregarMovimentacoesGuarda(silencioso = false) {
     })
     .getMovimentacoesRecentesGuarda();
 }
+
+function obterSessaoConsultaEfetivo() {
+  return localStorage.getItem('consulta_efetivo_sessao_token') || '';
+}
+
+function enviarCodigoConsultaEfetivo() {
+  const email = String(document.getElementById('emailConsultaEfetivo').value || '').trim().toLowerCase();
+  if (!email || !email.includes('@')) {
+    mostrarMensagem('Informe o e-mail cadastrado no efetivo do 1º GBM.', 'erro');
+    return;
+  }
+  const botao = document.getElementById('btnEnviarCodigoConsultaEfetivo');
+  botao.disabled = true;
+  botao.textContent = 'Enviando...';
+  google.script.run
+    .withSuccessHandler((resposta) => {
+      document.getElementById('areaCodigoConsultaEfetivo').classList.remove('oculto');
+      document.getElementById('codigoConsultaEfetivo').focus();
+      mostrarMensagem((resposta && resposta.mensagem) || 'Código enviado por e-mail.', 'sucesso');
+      botao.disabled = false;
+      botao.textContent = 'Reenviar código';
+    })
+    .withFailureHandler((erro) => {
+      mostrarMensagem('Não foi possível liberar a consulta: ' + erro.message, 'erro');
+      botao.disabled = false;
+      botao.textContent = 'Enviar código';
+    })
+    .enviarCodigoConsultaEfetivo(email);
+}
+
+function validarCodigoConsultaEfetivo() {
+  const email = String(document.getElementById('emailConsultaEfetivo').value || '').trim().toLowerCase();
+  const codigo = String(document.getElementById('codigoConsultaEfetivo').value || '').trim();
+  if (!email || !codigo) {
+    mostrarMensagem('Informe o e-mail e o código recebido.', 'erro');
+    return;
+  }
+  const botao = document.getElementById('btnValidarConsultaEfetivo');
+  botao.disabled = true;
+  botao.textContent = 'Validando...';
+  google.script.run
+    .withSuccessHandler((resposta) => {
+      consultaEfetivoAtual = resposta && resposta.militar ? resposta.militar : null;
+      localStorage.setItem('consulta_efetivo_sessao_token', resposta.sessaoToken || '');
+      localStorage.setItem('consulta_efetivo_militar', JSON.stringify(consultaEfetivoAtual || {}));
+      atualizarTelaConsultaEfetivo();
+      carregarMovimentacoesConsultaEfetivo();
+      mostrarMensagem('E-mail validado. Consulta das últimas 48 horas liberada.', 'sucesso');
+      botao.disabled = false;
+      botao.textContent = 'Validar';
+    })
+    .withFailureHandler((erro) => {
+      mostrarMensagem('Não foi possível validar a consulta: ' + erro.message, 'erro');
+      botao.disabled = false;
+      botao.textContent = 'Validar';
+    })
+    .validarCodigoConsultaEfetivo(email, codigo);
+}
+
+function restaurarConsultaEfetivo() {
+  try {
+    consultaEfetivoAtual = JSON.parse(localStorage.getItem('consulta_efetivo_militar') || 'null');
+  } catch (erro) {
+    consultaEfetivoAtual = null;
+  }
+  atualizarTelaConsultaEfetivo();
+  if (obterSessaoConsultaEfetivo()) carregarMovimentacoesConsultaEfetivo(true);
+}
+
+function atualizarTelaConsultaEfetivo() {
+  const autenticado = !!obterSessaoConsultaEfetivo();
+  const login = document.getElementById('areaLoginConsultaEfetivo');
+  const area = document.getElementById('areaMovimentacoesConsultaEfetivo');
+  const sair = document.getElementById('btnSairConsultaEfetivo');
+  if (!login || !area || !sair) return;
+  login.classList.toggle('oculto', autenticado);
+  area.classList.toggle('oculto', !autenticado);
+  sair.classList.toggle('oculto', !autenticado);
+  const nome = document.getElementById('militarConsultaEfetivo');
+  if (nome && consultaEfetivoAtual) {
+    nome.textContent = (consultaEfetivoAtual.Nome || 'Militar do 1º GBM') + ' • somente leitura';
+  }
+}
+
+function carregarMovimentacoesConsultaEfetivo(silencioso = false) {
+  const token = obterSessaoConsultaEfetivo();
+  if (!token) return;
+  const botao = document.getElementById('btnAtualizarConsultaEfetivo');
+  if (botao) {
+    botao.disabled = true;
+    botao.textContent = 'Atualizando...';
+  }
+  google.script.run
+    .withSuccessHandler((resposta) => {
+      consultaEfetivoAtual = resposta && resposta.militar ? resposta.militar : consultaEfetivoAtual;
+      localStorage.setItem('consulta_efetivo_militar', JSON.stringify(consultaEfetivoAtual || {}));
+      atualizarTelaConsultaEfetivo();
+      const movimentacoes = resposta && resposta.movimentacoes ? resposta.movimentacoes : [];
+      renderizarListaMovimentacoesRecentes(movimentacoes, 'listaMovimentacoesConsultaEfetivo');
+      const total = Number(resposta && resposta.total || 0);
+      document.getElementById('resumoConsultaEfetivo').textContent =
+        total === 1 ? '1 movimentação nas últimas 48h' : total + ' movimentações nas últimas 48h';
+      if (resposta && resposta.periodoInicio && resposta.periodoFim) {
+        document.getElementById('periodoConsultaEfetivo').textContent =
+          'Período: ' + resposta.periodoInicio + ' até ' + resposta.periodoFim + '.';
+      }
+      document.getElementById('atualizadoEmConsultaEfetivo').textContent =
+        resposta && resposta.atualizadoEm ? 'Atualizado em ' + resposta.atualizadoEm : '';
+      if (botao) {
+        botao.disabled = false;
+        botao.textContent = 'Atualizar';
+      }
+    })
+    .withFailureHandler((erro) => {
+      sairConsultaEfetivo(false);
+      if (!silencioso) mostrarMensagem('Erro ao consultar movimentações: ' + erro.message, 'erro');
+      if (botao) {
+        botao.disabled = false;
+        botao.textContent = 'Atualizar';
+      }
+    })
+    .getMovimentacoesConsultaEfetivo(token);
+}
+
+function sairConsultaEfetivo(exibirMensagem = true) {
+  consultaEfetivoAtual = null;
+  localStorage.removeItem('consulta_efetivo_sessao_token');
+  localStorage.removeItem('consulta_efetivo_militar');
+  const codigo = document.getElementById('codigoConsultaEfetivo');
+  if (codigo) codigo.value = '';
+  atualizarTelaConsultaEfetivo();
+  if (exibirMensagem) mostrarMensagem('Consulta encerrada neste aparelho.', 'sucesso');
+}
+
 
 function definirMovimentacoesGuardaRecolhido(recolhido) {
   const card = document.getElementById('cardMovimentacoesGuarda');
