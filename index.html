@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#111827">
     <title>Controle de Acesso - 1º GBM</title>
-  <link rel="stylesheet" href="style.css?v=24.6.2">
+  <link rel="stylesheet" href="style.css?v=24.6.3">
   </head>
 
   <body>
@@ -305,7 +305,7 @@
             <h2>Oficial de Dia</h2>
             <div class="acoes-guarda">
               <button type="button" id="btnAbrirAcessoOficial" class="botao-trocar" onclick="expandirPerfilServico('perfilOficial', true)">Acessar painel</button>
-              <button type="button" id="btnEditarOficialDia" class="botao-trocar oculto" onclick="mostrarDesignacaoOficialDia()">Informar</button>
+              <button type="button" id="btnEditarOficialDia" class="botao-trocar oculto" aria-expanded="false" onclick="mostrarDesignacaoOficialDia()">Informar</button>
             </div>
           </div>
 
@@ -316,7 +316,10 @@
               <label>Oficial de Dia deste serviço</label>
               <select id="selectOficialDia"><option value="">Selecione o oficial</option></select>
             </div>
-            <button type="button" id="btnSalvarOficialDia" class="botao-secundario" onclick="salvarDesignacaoOficialDia()">Salvar Oficial de Dia</button>
+            <div class="acoes-designacao-oficial">
+              <button type="button" class="botao-cancelar-designacao" onclick="fecharDesignacaoOficialDia()">Cancelar</button>
+              <button type="button" id="btnSalvarOficialDia" class="botao-secundario" onclick="salvarDesignacaoOficialDia()">Salvar Oficial de Dia</button>
+            </div>
             <small>Informação válida para o ciclo atual, das 08h às 08h. O oficial indicado não precisa entrar no aplicativo.</small>
           </div>
 
@@ -707,6 +710,6 @@
       </div>
     </div>
 
-  <script src="app.js?v=24.6.2"></script>
+  <script src="app.js?v=24.6.3"></script>
   </body>
 </html>
