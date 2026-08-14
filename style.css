@@ -1533,3 +1533,54 @@
     text-align: center;
   }
 }
+.perfil-servico:not(.perfil-expandido) > .acesso-oficial-painel,
+.perfil-servico:not(.perfil-expandido) > .area-designar-oficial {
+  display: none !important;
+}
+
+.area-designar-oficial {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  background: #eff6ff;
+}
+
+.area-designar-oficial .botao-secundario {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.area-designar-oficial > small {
+  display: block;
+  margin-top: 8px;
+  color: #475569;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.acesso-oficial-painel {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.cabecalho-acesso-oficial {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.cabecalho-acesso-oficial strong,
+.cabecalho-acesso-oficial span {
+  display: block;
+}
+
+.cabecalho-acesso-oficial span {
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 11px;
+  line-height: 1.35;
+}
