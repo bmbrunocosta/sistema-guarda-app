@@ -1551,6 +1551,30 @@
   margin-top: 10px;
 }
 
+.acoes-designacao-oficial {
+  display: grid;
+  grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.acoes-designacao-oficial .botao-secundario,
+.botao-cancelar-designacao {
+  width: 100%;
+  min-height: 46px;
+  margin: 0;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.botao-cancelar-designacao {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+}
+
 .area-designar-oficial > small {
   display: block;
   margin-top: 8px;
