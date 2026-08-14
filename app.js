@@ -1993,7 +1993,7 @@ function atualizarTelaOficial() {
       ? 'Informar ou alterar o Oficial de Dia'
       : 'Entre como Comandante da Guarda neste aparelho para informar o Oficial de Dia';
   }
-  if (!comandantePodeEditar && areaDesignar) areaDesignar.classList.add('oculto');
+  if (!comandantePodeEditar && areaDesignar) fecharDesignacaoOficialDia();
 
   atualizarTelaAcessoOficial();
   atualizarVisibilidadePainelComandante();
@@ -2014,8 +2014,26 @@ function mostrarDesignacaoOficialDia() {
   }
   expandirPerfilServico('perfilOficial', true);
   const area = document.getElementById('areaDesignarOficial');
+  if (!area.classList.contains('oculto')) {
+    fecharDesignacaoOficialDia();
+    return;
+  }
   area.classList.remove('oculto');
+  atualizarEstadoDesignacaoOficialDia(true);
   carregarOpcoesOficialDia();
+}
+
+function atualizarEstadoDesignacaoOficialDia(aberta) {
+  const botao = document.getElementById('btnEditarOficialDia');
+  if (!botao) return;
+  botao.textContent = aberta ? 'Fechar' : 'Informar';
+  botao.setAttribute('aria-expanded', String(aberta));
+}
+
+function fecharDesignacaoOficialDia() {
+  const area = document.getElementById('areaDesignarOficial');
+  if (area) area.classList.add('oculto');
+  atualizarEstadoDesignacaoOficialDia(false);
 }
 
 function carregarOpcoesOficialDia() {
@@ -2047,7 +2065,7 @@ function salvarDesignacaoOficialDia() {
   google.script.run
     .withSuccessHandler((resposta) => {
       oficialAtual = resposta.oficial;
-      document.getElementById('areaDesignarOficial').classList.add('oculto');
+      fecharDesignacaoOficialDia();
       atualizarTelaOficial();
       mostrarMensagem(resposta.mensagem, 'sucesso');
       botao.disabled = false;
