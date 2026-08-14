@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#111827">
     <title>Controle de Acesso - 1º GBM</title>
-  <link rel="stylesheet" href="style.css?v=24.6.3">
+  <link rel="stylesheet" href="style.css?v=24.6.4">
   </head>
 
   <body>
@@ -304,7 +304,7 @@
           <div class="cabecalho-card-guarda">
             <h2>Oficial de Dia</h2>
             <div class="acoes-guarda">
-              <button type="button" id="btnAbrirAcessoOficial" class="botao-trocar" onclick="expandirPerfilServico('perfilOficial', true)">Acessar painel</button>
+              <button type="button" id="btnAbrirAcessoOficial" class="botao-trocar" aria-expanded="false" aria-controls="areaAcessoPainelOficial" onclick="alternarAcessoPainelOficial()">Acessar painel</button>
               <button type="button" id="btnEditarOficialDia" class="botao-trocar oculto" aria-expanded="false" onclick="mostrarDesignacaoOficialDia()">Informar</button>
             </div>
           </div>
@@ -323,7 +323,7 @@
             <small>Informação válida para o ciclo atual, das 08h às 08h. O oficial indicado não precisa entrar no aplicativo.</small>
           </div>
 
-          <div class="acesso-oficial-painel">
+          <div id="areaAcessoPainelOficial" class="acesso-oficial-painel oculto">
             <div class="cabecalho-acesso-oficial">
               <div>
                 <strong>Acesso de oficiais ao painel</strong>
@@ -710,6 +710,6 @@
       </div>
     </div>
 
-  <script src="app.js?v=24.6.3"></script>
+  <script src="app.js?v=24.6.4"></script>
   </body>
 </html>
