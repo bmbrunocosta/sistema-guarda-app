@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#111827">
     <title>Controle de Acesso - 1º GBM</title>
-  <link rel="stylesheet" href="style.css?v=24.4.4">
+  <link rel="stylesheet" href="style.css?v=24.5.0">
   </head>
 
   <body>
@@ -188,11 +188,55 @@
           </div>
 
           <div id="conteudoMovimentacoesGuarda" class="conteudo-pessoas-dentro-guarda" hidden>
-            <p id="cicloMovimentacoesGuarda" class="descricao-pessoas-dentro-guarda">Registros do ciclo atual, das 08h às 08h.</p>
+            <p id="cicloMovimentacoesGuarda" class="descricao-pessoas-dentro-guarda">Movimentações registradas nas últimas 24 horas.</p>
             <div id="listaMovimentacoesGuarda" class="lista-painel">
               <div class="estado-vazio-painel">Carregando...</div>
             </div>
             <div id="atualizadoEmMovimentacoesGuarda" class="rodape-painel-comandante"></div>
+          </div>
+        </section>
+
+        <section class="card card-consulta-efetivo" id="cardConsultaEfetivo">
+          <div class="cabecalho-consulta-efetivo">
+            <div>
+              <h2>Consulta do Efetivo</h2>
+              <p>Militares do 1º GBM podem consultar, em modo somente leitura, as movimentações das últimas 48 horas.</p>
+            </div>
+            <button type="button" id="btnSairConsultaEfetivo" class="botao-sair oculto" onclick="sairConsultaEfetivo()">Sair</button>
+          </div>
+
+          <div id="areaLoginConsultaEfetivo">
+            <div class="campo campo-sem-margem">
+              <label>E-mail cadastrado no efetivo do 1º GBM</label>
+              <div class="linha-busca">
+                <input type="email" id="emailConsultaEfetivo" placeholder="seu.email@..." autocomplete="email">
+                <button type="button" id="btnEnviarCodigoConsultaEfetivo" onclick="enviarCodigoConsultaEfetivo()">Enviar código</button>
+              </div>
+            </div>
+            <div id="areaCodigoConsultaEfetivo" class="area-codigo-consulta oculto">
+              <div class="campo campo-sem-margem">
+                <label>Código recebido por e-mail</label>
+                <div class="linha-busca">
+                  <input type="text" id="codigoConsultaEfetivo" inputmode="numeric" maxlength="6" placeholder="000000">
+                  <button type="button" id="btnValidarConsultaEfetivo" onclick="validarCodigoConsultaEfetivo()">Validar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="areaMovimentacoesConsultaEfetivo" class="oculto">
+            <div class="cabecalho-lista-consulta">
+              <div>
+                <strong id="militarConsultaEfetivo">Consulta liberada</strong>
+                <span id="resumoConsultaEfetivo">Carregando movimentações...</span>
+              </div>
+              <button type="button" id="btnAtualizarConsultaEfetivo" onclick="carregarMovimentacoesConsultaEfetivo()">Atualizar</button>
+            </div>
+            <p id="periodoConsultaEfetivo" class="descricao-pessoas-dentro-guarda">Últimas 48 horas.</p>
+            <div id="listaMovimentacoesConsultaEfetivo" class="lista-painel">
+              <div class="estado-vazio-painel">Carregando...</div>
+            </div>
+            <div id="atualizadoEmConsultaEfetivo" class="rodape-painel-comandante"></div>
           </div>
         </section>
 
@@ -652,7 +696,6 @@
       </div>
     </div>
 
-  <script src="app.js?v=24.4.4"></script>
+  <script src="app.js?v=24.5.0"></script>
   </body>
 </html>
-
